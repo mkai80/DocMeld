@@ -28,7 +28,7 @@ Status legend: `[PENDING]` | `[IN PROGRESS]` | `[DONE]` | `[BLOCKED]`
 
 ---
 
-## Use Case 2 — Research Paper to PRD [IN PROGRESS]
+## Use Case 2 — Research Paper to PRD [DONE]
 
 **Branch**: `003-paper-to-prd`
 
@@ -77,7 +77,7 @@ Status legend: `[PENDING]` | `[IN PROGRESS]` | `[DONE]` | `[BLOCKED]`
 
 ---
 
-## Use Case 4 — Research Paper to Workflow [PENDING]
+## Use Case 4 — Research Paper to Workflow [IN PROGRESS]
 
 **Branch**: `005-paper-to-workflow`
 

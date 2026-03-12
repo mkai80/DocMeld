@@ -222,3 +222,42 @@ class DocMeldParser:
             client=client,
             source_pdf=Path(self.path).name,
         )
+
+    def process_workflow(self) -> "WorkflowResult":
+        """Generate a workflow from a single PDF research paper.
+
+        Processes the PDF through bronze→silver, then sends aggregated
+        content to DeepSeek to generate a structured workflow markdown file.
+
+        Returns:
+            WorkflowResult with output path and section count.
+        """
+        if self._is_folder:
+            raise ValueError("process_workflow() requires a single PDF file, not a folder")
+
+        from docmeld.workflow.generator import generate_workflow
+        from docmeld.workflow.models import WorkflowResult
+
+        # Step 1: Bronze
+        bronze_result = self.process_bronze()
+        if not hasattr(bronze_result, "output_path"):
+            raise RuntimeError("Bronze processing failed")
+
+        # Step 2: Silver
+        silver_result = self.process_silver(bronze_result.output_path)
+
+        # Step 3: Generate Workflow
+        from docmeld.gold.deepseek_client import DeepSeekClient
+        from docmeld.utils.env_loader import load_env
+
+        env = load_env(require_api_key=True)
+        client = DeepSeekClient(
+            api_key=env["DEEPSEEK_API_KEY"],
+            endpoint=env.get("DEEPSEEK_API_ENDPOINT"),
+        )
+
+        return generate_workflow(
+            silver_jsonl_path=silver_result.output_path,
+            client=client,
+            source_pdf=Path(self.path).name,
+        )

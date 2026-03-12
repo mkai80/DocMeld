@@ -67,6 +67,16 @@ def main(args: list[str] | None = None) -> int:
         help="PDF parsing backend (default: pymupdf)",
     )
 
+    # workflow
+    p_wf = subparsers.add_parser("workflow", help="Generate workflow from a research paper PDF")
+    p_wf.add_argument("path", help="Path to a single PDF file")
+    p_wf.add_argument(
+        "--backend",
+        choices=["pymupdf", "docling"],
+        default="pymupdf",
+        help="PDF parsing backend (default: pymupdf)",
+    )
+
     parsed = parser.parse_args(args)
 
     if not parsed.command:
@@ -144,6 +154,19 @@ def main(args: list[str] | None = None) -> int:
                 print(f"PRD already exists: {result.output_path}")
             else:
                 print(f"PRD generated: {result.sections} sections")
+                print(f"Output: {result.output_path}")
+
+        elif parsed.command == "workflow":
+            if Path(path).is_dir():
+                print(f"Error: workflow requires a single PDF file, got folder: {path}", file=sys.stderr)
+                return 1
+            backend = getattr(parsed, "backend", "pymupdf")
+            doc = DocMeldParser(path, backend=backend)
+            result = doc.process_workflow()
+            if result.skipped:
+                print(f"Workflow already exists: {result.output_path}")
+            else:
+                print(f"Workflow generated: {result.sections} sections")
                 print(f"Output: {result.output_path}")
 
     except Exception as e:
