@@ -55,7 +55,7 @@ Status legend: `[PENDING]` | `[IN PROGRESS]` | `[DONE]` | `[BLOCKED]`
 
 ---
 
-## Use Case 3 — Books to Claude Skills [PENDING]
+## Use Case 3 — Books to Claude Skills [IN PROGRESS]
 
 **Branch**: `004-books-to-skills`
 
@@ -77,7 +77,7 @@ Status legend: `[PENDING]` | `[IN PROGRESS]` | `[DONE]` | `[BLOCKED]`
 
 ---
 
-## Use Case 4 — Research Paper to Workflow [IN PROGRESS]
+## Use Case 4 — Research Paper to Workflow [DONE]
 
 **Branch**: `005-paper-to-workflow`
 

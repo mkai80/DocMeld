@@ -77,6 +77,16 @@ def main(args: list[str] | None = None) -> int:
         help="PDF parsing backend (default: pymupdf)",
     )
 
+    # skills
+    p_sk = subparsers.add_parser("skills", help="Extract Claude Code skills from a book PDF")
+    p_sk.add_argument("path", help="Path to a single PDF file")
+    p_sk.add_argument(
+        "--backend",
+        choices=["pymupdf", "docling"],
+        default="pymupdf",
+        help="PDF parsing backend (default: pymupdf)",
+    )
+
     parsed = parser.parse_args(args)
 
     if not parsed.command:
@@ -168,6 +178,19 @@ def main(args: list[str] | None = None) -> int:
             else:
                 print(f"Workflow generated: {result.sections} sections")
                 print(f"Output: {result.output_path}")
+
+        elif parsed.command == "skills":
+            if Path(path).is_dir():
+                print(f"Error: skills requires a single PDF file, got folder: {path}", file=sys.stderr)
+                return 1
+            backend = getattr(parsed, "backend", "pymupdf")
+            doc = DocMeldParser(path, backend=backend)
+            result = doc.process_skills()
+            if result.skipped:
+                print(f"Skills already exist: {result.output_dir} ({result.skill_count} skills)")
+            else:
+                print(f"Extracted {result.skill_count} skills")
+                print(f"Output: {result.output_dir}")
 
     except Exception as e:
         logger.error(f"Pipeline error: {e}")
