@@ -55,7 +55,7 @@ Status legend: `[PENDING]` | `[IN PROGRESS]` | `[DONE]` | `[BLOCKED]`
 
 ---
 
-## Use Case 3 — Books to Claude Skills [IN PROGRESS]
+## Use Case 3 — Books to Claude Skills [DONE]
 
 **Branch**: `004-books-to-skills`
 
