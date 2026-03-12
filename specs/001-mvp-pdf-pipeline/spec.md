@@ -5,6 +5,16 @@
 **Status**: Draft
 **Input**: User description: "MVP PDF data pipeline with bronze, silver, and gold processing stages"
 
+## Clarifications
+
+### Session 2026-03-12
+
+- Q: When processing a folder of PDFs and one file fails at the bronze stage, should the pipeline continue processing remaining files or stop immediately? → A: Continue processing all files, log errors, report failures in summary (fail-fast disabled)
+- Q: Should gold output overwrite the silver JSONL in-place, or write to a separate file? → A: Write to separate file with `_gold` suffix (e.g., `filename_hash6_gold.jsonl`)
+- Q: Where should the log file be created and what naming convention should be used? → A: Timestamped log file `docmeld_YYYYMMDD_HHMMSS.log` in current working directory
+- Q: How should the DeepSeek API key and endpoint be configured? → A: Environment variable `DEEPSEEK_API_KEY` (required), optional `DEEPSEEK_API_ENDPOINT` for custom endpoints, with support for `.env.local` file at repo root
+- Q: Should table numbering in silver JSONL reset per page or remain global across the document? → A: Global numbering across entire document (Table1, Table2, ... TableN)
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - Process Single PDF to Bronze Format (Priority: P1)
@@ -141,7 +151,7 @@ As a developer, I want to analyze each page's content and extract descriptions a
 
 - **FR-018**: System MUST track title hierarchy across elements and include all parent titles at the beginning of each page's content.
 
-- **FR-019**: The `page_content` field MUST render all elements from that page in markdown format, preserving table markers like `[[Table1]]` and `[/Table1]`.
+- **FR-019**: The `page_content` field MUST render all elements from that page in markdown format, preserving table markers like `[[Table1]]` and `[/Table1]`. Table numbering MUST be global across the entire document (not reset per page), and only tables with more than 1 data row receive a numbered marker; small tables use `[[Table]]` without a number.
 
 - **FR-020**: Title elements MUST be rendered as markdown headings (e.g., `#`, `##`, `###`) based on their level.
 
@@ -151,9 +161,9 @@ As a developer, I want to analyze each page's content and extract descriptions a
 
 **Gold Level Processing:**
 
-- **FR-023**: System MUST accept a silver JSONL file path as input and produce an enriched JSONL file with the same name (overwriting or creating a new version).
+- **FR-023**: System MUST accept a silver JSONL file path as input and produce an enriched JSONL file with a `_gold` suffix (e.g., `filename_hash6_gold.jsonl`) in the same output folder, preserving the original silver JSONL file.
 
-- **FR-024**: System MUST use DeepSeek-chat API to analyze each page's `page_content` and extract semantic metadata.
+- **FR-024**: System MUST use DeepSeek-chat API to analyze each page's `page_content` and extract semantic metadata. API credentials MUST be provided via the `DEEPSEEK_API_KEY` environment variable (required). An optional `DEEPSEEK_API_ENDPOINT` environment variable MAY be used to specify custom API endpoints. The system MUST support loading these variables from a `.env.local` file at the repository root.
 
 - **FR-025**: For each page, the system MUST add a `description` field (string, one-line summary) to the metadata.
 
@@ -169,11 +179,13 @@ As a developer, I want to analyze each page's content and extract descriptions a
 
 - **FR-030**: System MUST provide progress indicators when processing multiple files (e.g., "Processing 3/10 files...").
 
-- **FR-031**: System MUST log all errors with sufficient context (filename, page number, error message) to a log file.
+- **FR-031**: System MUST log all errors with sufficient context (filename, page number, error message) to a timestamped log file named `docmeld_YYYYMMDD_HHMMSS.log` in the current working directory. A new log file is created per pipeline invocation.
 
 - **FR-032**: System MUST generate a summary report after processing showing: total files processed, successful conversions, failed conversions, and processing time.
 
 - **FR-033**: System MUST be idempotent - running the same processing step multiple times produces the same result without duplicating work.
+
+- **FR-034**: When processing multiple files in batch mode, the system MUST continue processing all remaining files even if one file fails, logging each error and including all failures in the final summary report (fail-fast disabled).
 
 ### Key Entities
 

@@ -1,0 +1,156 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://docmeld.org/schemas/element-v1.json",
+  "title": "DocMeld Element Schema",
+  "description": "JSON Schema for DocMeld bronze element format",
+  "type": "array",
+  "items": {
+    "oneOf": [
+      {
+        "$ref": "#/definitions/TitleElement"
+      },
+      {
+        "$ref": "#/definitions/TextElement"
+      },
+      {
+        "$ref": "#/definitions/TableElement"
+      },
+      {
+        "$ref": "#/definitions/ImageElement"
+      }
+    ]
+  },
+  "definitions": {
+    "BaseElement": {
+      "type": "object",
+      "required": ["type", "page_no"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["title", "text", "table", "image"]
+        },
+        "page_no": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Physical page number (1-indexed)"
+        }
+      }
+    },
+    "TitleElement": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/BaseElement"
+        },
+        {
+          "type": "object",
+          "required": ["level", "content"],
+          "properties": {
+            "type": {
+              "const": "title"
+            },
+            "level": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 5,
+              "description": "Heading level (0=H1, 1=H2, etc.)"
+            },
+            "content": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Title text"
+            }
+          }
+        }
+      ]
+    },
+    "TextElement": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/BaseElement"
+        },
+        {
+          "type": "object",
+          "required": ["content"],
+          "properties": {
+            "type": {
+              "const": "text"
+            },
+            "content": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Text content (may include newlines)"
+            }
+          }
+        }
+      ]
+    },
+    "TableElement": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/BaseElement"
+        },
+        {
+          "type": "object",
+          "required": ["content", "summary"],
+          "properties": {
+            "type": {
+              "const": "table"
+            },
+            "content": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Markdown-formatted table"
+            },
+            "summary": {
+              "type": "string",
+              "description": "First column items summary (e.g., 'Items: Revenue, Margin')"
+            }
+          }
+        }
+      ]
+    },
+    "ImageElement": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/BaseElement"
+        },
+        {
+          "type": "object",
+          "required": ["image_name", "content", "image", "image_id", "bbox"],
+          "properties": {
+            "type": {
+              "const": "image"
+            },
+            "image_name": {
+              "type": "string",
+              "description": "Original filename (e.g., 'page001_image_001.png')"
+            },
+            "content": {
+              "type": "string",
+              "description": "Optional description/caption"
+            },
+            "image": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9+/=]+$",
+              "description": "Base64-encoded image data"
+            },
+            "image_id": {
+              "type": "string",
+              "description": "Unique identifier (filename stem)"
+            },
+            "bbox": {
+              "type": "array",
+              "items": {
+                "type": "number",
+                "minimum": 0
+              },
+              "minItems": 4,
+              "maxItems": 4,
+              "description": "Bounding box [x0, y0, x1, y1]"
+            }
+          }
+        }
+      ]
+    }
+  }
+}
