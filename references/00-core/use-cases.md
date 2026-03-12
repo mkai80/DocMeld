@@ -4,7 +4,7 @@ Status legend: `[PENDING]` | `[IN PROGRESS]` | `[DONE]` | `[BLOCKED]`
 
 ---
 
-## Use Case 1 — Research Papers General Reading [IN PROGRESS]
+## Use Case 1 — Research Papers General Reading [DONE]
 
 **Branch**: `002-paper-batch-categorize`
 
@@ -28,7 +28,7 @@ Status legend: `[PENDING]` | `[IN PROGRESS]` | `[DONE]` | `[BLOCKED]`
 
 ---
 
-## Use Case 2 — Research Paper to PRD [PENDING]
+## Use Case 2 — Research Paper to PRD [IN PROGRESS]
 
 **Branch**: `003-paper-to-prd`
 

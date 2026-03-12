@@ -1,7 +1,9 @@
 <p align="center">
-  <h1 align="center">DocMeld</h1>
-  <p align="center">Lightweight PDF to agent-ready knowledge pipeline</p>
+  <img src="assets/banner.png" alt="DocMeld Banner" width="100%">
 </p>
+
+<h1 align="center">DocMeld</h1>
+<p align="center">Lightweight Doc to agent-ready knowledge pipeline</p>
 
 <p align="center">
   <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT"></a>
@@ -24,7 +26,7 @@
 
 ---
 
-DocMeld converts PDF documents into structured, agent-consumable formats through a three-stage pipeline — without requiring expensive OCR, VLM, or multimodal models. Built for the age of AI agents, it bridges the gap between static documents and the structured knowledge that LLMs need.
+DocMeld converts PDF, Word documents into structured, agent-consumable formats through a three-stage pipeline — without requiring expensive OCR, VLM, or multimodal models. Built for the age of AI agents, it bridges the gap between static documents and the structured knowledge that LLMs need.
 
 Most tools stop at format conversion. DocMeld goes further: **Document → Structured Elements → Page Knowledge → AI-Enriched Metadata**, producing outputs ready for RAG pipelines, agent systems, and downstream AI workflows.
 
