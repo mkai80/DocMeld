@@ -183,3 +183,42 @@ class DocMeldParser:
             papers_failed=0,
             reorganized=reorganize,
         )
+
+    def process_prd(self) -> "PrdResult":
+        """Generate a PRD from a single PDF research paper.
+
+        Processes the PDF through bronze→silver, then sends aggregated
+        content to DeepSeek to generate a structured PRD markdown file.
+
+        Returns:
+            PrdResult with output path and section count.
+        """
+        if self._is_folder:
+            raise ValueError("process_prd() requires a single PDF file, not a folder")
+
+        from docmeld.prd.generator import generate_prd
+        from docmeld.prd.models import PrdResult
+
+        # Step 1: Bronze
+        bronze_result = self.process_bronze()
+        if not hasattr(bronze_result, "output_path"):
+            raise RuntimeError("Bronze processing failed")
+
+        # Step 2: Silver
+        silver_result = self.process_silver(bronze_result.output_path)
+
+        # Step 3: Generate PRD
+        from docmeld.gold.deepseek_client import DeepSeekClient
+        from docmeld.utils.env_loader import load_env
+
+        env = load_env(require_api_key=True)
+        client = DeepSeekClient(
+            api_key=env["DEEPSEEK_API_KEY"],
+            endpoint=env.get("DEEPSEEK_API_ENDPOINT"),
+        )
+
+        return generate_prd(
+            silver_jsonl_path=silver_result.output_path,
+            client=client,
+            source_pdf=Path(self.path).name,
+        )

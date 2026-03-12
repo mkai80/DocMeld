@@ -57,6 +57,16 @@ def main(args: list[str] | None = None) -> int:
         help="Move files into category subdirectories",
     )
 
+    # prd
+    p_prd = subparsers.add_parser("prd", help="Generate PRD from a research paper PDF")
+    p_prd.add_argument("path", help="Path to a single PDF file")
+    p_prd.add_argument(
+        "--backend",
+        choices=["pymupdf", "docling"],
+        default="pymupdf",
+        help="PDF parsing backend (default: pymupdf)",
+    )
+
     parsed = parser.parse_args(args)
 
     if not parsed.command:
@@ -122,6 +132,19 @@ def main(args: list[str] | None = None) -> int:
                 print(f"Index: {result.index_path}")
                 if result.reorganized:
                     print("Files reorganized into category subdirectories")
+
+        elif parsed.command == "prd":
+            if Path(path).is_dir():
+                print(f"Error: prd requires a single PDF file, got folder: {path}", file=sys.stderr)
+                return 1
+            backend = getattr(parsed, "backend", "pymupdf")
+            doc = DocMeldParser(path, backend=backend)
+            result = doc.process_prd()
+            if result.skipped:
+                print(f"PRD already exists: {result.output_path}")
+            else:
+                print(f"PRD generated: {result.sections} sections")
+                print(f"Output: {result.output_path}")
 
     except Exception as e:
         logger.error(f"Pipeline error: {e}")

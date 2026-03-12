@@ -116,7 +116,7 @@ class DeepSeekClient:
     def categorize_papers(self, prompt: str) -> str:
         """Send a categorization prompt and return the raw response text.
 
-        Uses temperature=0 for deterministic output.
+        Uses temperature=1.0 for data extraction output.
 
         Args:
             prompt: The full categorization prompt with paper metadata.
@@ -136,7 +136,7 @@ class DeepSeekClient:
 
         kwargs: Dict[str, Any] = {
             "model": "deepseek-chat",
-            "temperature": 0,  # Deterministic for categorization
+            "temperature": 1.0,  # Deterministic for categorization
             "api_key": self.api_key,
         }
         if self.endpoint:
@@ -145,3 +145,20 @@ class DeepSeekClient:
         llm = ChatDeepSeek(**kwargs)
         response = llm.invoke(prompt)
         return str(response.content).strip()
+
+    def generate_prd(self, prompt: str) -> str:
+        """Send a PRD generation prompt and return the raw response text.
+
+        Uses temperature=1.0 for creative output.
+
+        Args:
+            prompt: The full PRD generation prompt with paper content.
+
+        Returns:
+            Raw response text (markdown PRD) from the API.
+        """
+        return call_with_retry(
+            lambda: self._call_categorize_api(prompt),
+            max_retries=3,
+            base_delay=1.0,
+        )
