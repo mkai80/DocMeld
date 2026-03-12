@@ -33,6 +33,14 @@
           "type": "integer",
           "minimum": 1,
           "description": "Physical page number (1-indexed)"
+        },
+        "element_id": {
+          "type": "string",
+          "description": "Sequential element identifier (e.g., 'e_001')"
+        },
+        "parent_id": {
+          "type": "string",
+          "description": "element_id of the nearest ancestor title"
         }
       }
     },
@@ -104,6 +112,25 @@
             "summary": {
               "type": "string",
               "description": "First column items summary (e.g., 'Items: Revenue, Margin')"
+            },
+            "table_data": {
+              "type": "object",
+              "description": "Structured table data with headers, rows, and dimensions",
+              "properties": {
+                "headers": {
+                  "type": "array",
+                  "items": {"type": "string"}
+                },
+                "rows": {
+                  "type": "array",
+                  "items": {
+                    "type": "array",
+                    "items": {"type": "string"}
+                  }
+                },
+                "num_rows": {"type": "integer", "minimum": 0},
+                "num_cols": {"type": "integer", "minimum": 0}
+              }
             }
           }
         }

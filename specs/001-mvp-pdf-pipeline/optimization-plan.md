@@ -1,4 +1,3 @@
-                                                                                                                        │
 │ Plan: ParserBackend Abstraction, Docling Integration, Schema Enhancements & AGPL Relicensing                                                        │
 │                                                                                                                                                     │
 │ Context                                                                                                                                             │

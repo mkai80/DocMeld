@@ -1,53 +1,92 @@
-"""Extract structured elements from PDF pages using PyMuPDF."""
+"""Extract structured elements from PDF pages.
+
+Dispatches to a backend (pymupdf or docling) and applies shared
+post-processing: element_id assignment, parent_id hierarchy, table
+summaries, and structured table_data.
+"""
 from __future__ import annotations
 
 import base64
 import glob
-import re
 from pathlib import Path
-from typing import Any, Dict, List, Optional
-
-import fitz
-import pymupdf4llm
+from typing import Any, Dict, List
 
 
-def extract_elements(pdf_path: str, output_dir: str) -> List[Dict[str, Any]]:
-    """Extract all elements from a PDF file.
+def extract_elements(
+    pdf_path: str, output_dir: str, backend: str = "pymupdf"
+) -> List[Dict[str, Any]]:
+    """Extract all elements from a PDF file using the specified backend.
 
-    Opens the PDF with PyMuPDF, extracts text via pymupdf4llm per page,
-    parses markdown into structured elements, and discovers images.
+    Args:
+        pdf_path: Path to the PDF file.
+        output_dir: Directory for auxiliary outputs (images, etc.).
+        backend: Parser backend name ("pymupdf" or "docling").
 
     Returns:
-        Ordered list of element dicts with type and page_no.
+        Ordered list of element dicts with type, page_no, element_id, parent_id.
     """
-    doc = fitz.open(pdf_path)
-    all_elements: List[Dict[str, Any]] = []
+    if backend == "docling":
+        from docmeld.bronze.backends.docling_backend import DoclingBackend
 
-    for page_num in range(len(doc)):
-        page_no = page_num + 1
+        b = DoclingBackend()
+    else:
+        from docmeld.bronze.backends.pymupdf_backend import PyMuPDFBackend
 
-        # Extract markdown from page
-        try:
-            md_content = pymupdf4llm.to_markdown(doc, pages=[page_num])
-        except Exception:
-            md_content = ""
+        b = PyMuPDFBackend()
 
-        if md_content:
-            page_elements = parse_markdown_to_elements(md_content, page_no)
-            all_elements.extend(page_elements)
+    elements = b.extract_elements(pdf_path, output_dir)
 
-        # Discover pre-extracted images
-        image_elements = _discover_images(output_dir, page_num)
-        all_elements.extend(image_elements)
-
-    doc.close()
-
-    # Generate table summaries
-    for elem in all_elements:
+    # Shared post-processing across all backends
+    for elem in elements:
         if elem["type"] == "table":
             elem["summary"] = generate_table_summary(elem["content"])
+            elem["table_data"] = parse_table_data(elem["content"])
 
-    return all_elements
+    _assign_element_ids(elements)
+    _assign_parent_ids(elements)
+
+    return elements
+
+
+def _assign_element_ids(elements: List[Dict[str, Any]]) -> None:
+    """Assign sequential element_id values (e_001, e_002, ...)."""
+    for i, elem in enumerate(elements):
+        elem["element_id"] = f"e_{i + 1:03d}"
+
+
+def _assign_parent_ids(elements: List[Dict[str, Any]]) -> None:
+    """Assign parent_id based on nearest ancestor title at a higher level.
+
+    Tracks a title stack keyed by level. Non-title elements get the
+    element_id of the most recent title. Titles get the element_id of
+    the most recent title at a strictly higher (lower-numbered) level.
+    """
+    # Stack: level -> element_id of the most recent title at that level
+    title_stack: Dict[int, str] = {}
+
+    for elem in elements:
+        if elem["type"] == "title":
+            level = elem.get("level", 0)
+            # Find nearest ancestor: closest title with level < current
+            parent_id = ""
+            for ancestor_level in range(level - 1, -1, -1):
+                if ancestor_level in title_stack:
+                    parent_id = title_stack[ancestor_level]
+                    break
+            elem["parent_id"] = parent_id
+
+            # Register this title and clear deeper levels
+            title_stack[level] = elem["element_id"]
+            for deeper in list(title_stack.keys()):
+                if deeper > level:
+                    del title_stack[deeper]
+        else:
+            # Non-title: parent is the most recent title (highest level number present)
+            parent_id = ""
+            if title_stack:
+                max_level = max(title_stack.keys())
+                parent_id = title_stack[max_level]
+            elem["parent_id"] = parent_id
 
 
 def parse_markdown_to_elements(
@@ -176,6 +215,40 @@ def generate_table_summary(table_md: str) -> str:
     if len(items) <= 5:
         return f"Items: {', '.join(items)}"
     return f"Items: {', '.join(items[:5])} (+{len(items) - 5} more)"
+
+
+def parse_table_data(table_md: str) -> Dict[str, Any]:
+    """Parse a markdown table into structured data.
+
+    Returns:
+        {"headers": [...], "rows": [[...], ...], "num_rows": N, "num_cols": M}
+    """
+    if not table_md.strip():
+        return {"headers": [], "rows": [], "num_rows": 0, "num_cols": 0}
+
+    lines = [line.strip() for line in table_md.strip().split("\n") if line.strip()]
+
+    headers: List[str] = []
+    rows: List[List[str]] = []
+
+    for i, line in enumerate(lines):
+        # Skip separator lines (e.g. |---|---|)
+        if all(c in "-|: " for c in line):
+            continue
+
+        cells = [c.strip() for c in line.split("|") if c.strip()]
+
+        if not headers:
+            headers = cells
+        else:
+            rows.append(cells)
+
+    return {
+        "headers": headers,
+        "rows": rows,
+        "num_rows": len(rows),
+        "num_cols": len(headers),
+    }
 
 
 def _discover_images(

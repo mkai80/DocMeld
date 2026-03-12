@@ -1,7 +1,7 @@
 """Pydantic models for document elements extracted from PDFs."""
 from __future__ import annotations
 
-from typing import Any, Literal, Tuple
+from typing import Any, Dict, Literal, Optional, Tuple
 
 from pydantic import BaseModel, Field
 
@@ -11,12 +11,16 @@ class TitleElement(BaseModel):
     level: int = Field(ge=0, le=5)
     content: str = Field(min_length=1)
     page_no: int = Field(ge=1)
+    element_id: str = ""
+    parent_id: str = ""
 
 
 class TextElement(BaseModel):
     type: Literal["text"]
     content: str = Field(min_length=1)
     page_no: int = Field(ge=1)
+    element_id: str = ""
+    parent_id: str = ""
 
 
 class TableElement(BaseModel):
@@ -24,6 +28,9 @@ class TableElement(BaseModel):
     content: str = Field(min_length=1)
     summary: str
     page_no: int = Field(ge=1)
+    element_id: str = ""
+    parent_id: str = ""
+    table_data: Optional[Dict[str, Any]] = None
 
 
 class ImageElement(BaseModel):
@@ -34,6 +41,8 @@ class ImageElement(BaseModel):
     image_id: str
     bbox: Tuple[float, float, float, float]
     page_no: int = Field(ge=1)
+    element_id: str = ""
+    parent_id: str = ""
 
 
 BronzeElement = TitleElement | TextElement | TableElement | ImageElement

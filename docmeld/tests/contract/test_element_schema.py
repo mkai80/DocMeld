@@ -66,3 +66,51 @@ class TestElementSchema:
             assert "type" in elem
             assert "page_no" in elem
             assert elem["page_no"] >= 1
+
+    def test_schema_has_element_id_field(self, schema: dict) -> None:  # type: ignore[type-arg]
+        base = schema["definitions"]["BaseElement"]
+        assert "element_id" in base["properties"]
+        assert base["properties"]["element_id"]["type"] == "string"
+
+    def test_schema_has_parent_id_field(self, schema: dict) -> None:  # type: ignore[type-arg]
+        base = schema["definitions"]["BaseElement"]
+        assert "parent_id" in base["properties"]
+        assert base["properties"]["parent_id"]["type"] == "string"
+
+    def test_schema_has_table_data_field(self, schema: dict) -> None:  # type: ignore[type-arg]
+        table_def = schema["definitions"]["TableElement"]["allOf"][1]
+        assert "table_data" in table_def["properties"]
+        assert table_def["properties"]["table_data"]["type"] == "object"
+
+    def test_element_id_and_parent_id_not_required(self, schema: dict) -> None:  # type: ignore[type-arg]
+        base = schema["definitions"]["BaseElement"]
+        assert "element_id" not in base["required"]
+        assert "parent_id" not in base["required"]
+
+    def test_table_data_not_required(self, schema: dict) -> None:  # type: ignore[type-arg]
+        table_def = schema["definitions"]["TableElement"]["allOf"][1]
+        assert "table_data" not in table_def["required"]
+
+    def test_valid_element_with_ids(self) -> None:
+        element = {
+            "type": "title", "level": 0, "content": "Test", "page_no": 1,
+            "element_id": "e_001", "parent_id": "",
+        }
+        assert element["element_id"] == "e_001"
+        assert element["parent_id"] == ""
+
+    def test_valid_table_with_table_data(self) -> None:
+        element = {
+            "type": "table",
+            "content": "| A | B |\n|---|---|\n| 1 | 2 |",
+            "summary": "Items: 1",
+            "page_no": 1,
+            "table_data": {
+                "headers": ["A", "B"],
+                "rows": [["1", "2"]],
+                "num_rows": 1,
+                "num_cols": 2,
+            },
+        }
+        assert element["table_data"]["num_rows"] == 1
+        assert element["table_data"]["headers"] == ["A", "B"]

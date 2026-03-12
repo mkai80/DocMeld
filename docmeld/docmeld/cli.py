@@ -17,10 +17,22 @@ def main(args: list[str] | None = None) -> int:
     # process (all stages)
     p_all = subparsers.add_parser("process", help="Run full pipeline (bronze → silver → gold)")
     p_all.add_argument("path", help="Path to PDF file or folder of PDFs")
+    p_all.add_argument(
+        "--backend",
+        choices=["pymupdf", "docling"],
+        default="pymupdf",
+        help="PDF parsing backend (default: pymupdf)",
+    )
 
     # bronze
     p_bronze = subparsers.add_parser("bronze", help="Run bronze stage only (PDF → JSON)")
     p_bronze.add_argument("path", help="Path to PDF file or folder of PDFs")
+    p_bronze.add_argument(
+        "--backend",
+        choices=["pymupdf", "docling"],
+        default="pymupdf",
+        help="PDF parsing backend (default: pymupdf)",
+    )
 
     # silver
     p_silver = subparsers.add_parser("silver", help="Run silver stage only (JSON → JSONL)")
@@ -48,7 +60,8 @@ def main(args: list[str] | None = None) -> int:
 
     try:
         if parsed.command == "process":
-            doc = DocMeldParser(path)
+            backend = getattr(parsed, "backend", "pymupdf")
+            doc = DocMeldParser(path, backend=backend)
             result = doc.process_all()
             print(f"Done: {result.successful}/{result.total_files} files processed")
             if result.failed > 0:
@@ -58,7 +71,8 @@ def main(args: list[str] | None = None) -> int:
             print(f"Time: {result.processing_time_seconds}s")
 
         elif parsed.command == "bronze":
-            doc = DocMeldParser(path)
+            backend = getattr(parsed, "backend", "pymupdf")
+            doc = DocMeldParser(path, backend=backend)
             result = doc.process_bronze()
             if hasattr(result, "element_count"):
                 print(f"Bronze: {result.element_count} elements, {result.page_count} pages")

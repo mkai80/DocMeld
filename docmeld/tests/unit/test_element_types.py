@@ -13,6 +13,23 @@ class TestTitleElement:
         assert elem.content == "Executive Summary"
         assert elem.page_no == 1
 
+    def test_default_element_id_and_parent_id(self) -> None:
+        from docmeld.bronze.element_types import TitleElement
+
+        elem = TitleElement(type="title", level=0, content="Title", page_no=1)
+        assert elem.element_id == ""
+        assert elem.parent_id == ""
+
+    def test_custom_element_id_and_parent_id(self) -> None:
+        from docmeld.bronze.element_types import TitleElement
+
+        elem = TitleElement(
+            type="title", level=1, content="Sub", page_no=1,
+            element_id="e_002", parent_id="e_001",
+        )
+        assert elem.element_id == "e_002"
+        assert elem.parent_id == "e_001"
+
     def test_level_range(self) -> None:
         from docmeld.bronze.element_types import TitleElement
 
@@ -54,6 +71,13 @@ class TestTextElement:
         assert elem.content == "Some paragraph text."
         assert elem.page_no == 2
 
+    def test_default_element_id_and_parent_id(self) -> None:
+        from docmeld.bronze.element_types import TextElement
+
+        elem = TextElement(type="text", content="Hello", page_no=1)
+        assert elem.element_id == ""
+        assert elem.parent_id == ""
+
     def test_empty_content_rejected(self) -> None:
         from docmeld.bronze.element_types import TextElement
 
@@ -73,6 +97,33 @@ class TestTableElement:
         )
         assert elem.type == "table"
         assert elem.summary == "Items: A, B"
+
+    def test_default_table_data_is_none(self) -> None:
+        from docmeld.bronze.element_types import TableElement
+
+        elem = TableElement(
+            type="table", content="| A |\n|---|\n| 1 |", summary="", page_no=1
+        )
+        assert elem.table_data is None
+
+    def test_table_data_with_value(self) -> None:
+        from docmeld.bronze.element_types import TableElement
+
+        td = {"headers": ["A", "B"], "rows": [["1", "2"]], "num_rows": 1, "num_cols": 2}
+        elem = TableElement(
+            type="table", content="| A | B |\n|---|---|\n| 1 | 2 |",
+            summary="", page_no=1, table_data=td,
+        )
+        assert elem.table_data == td
+
+    def test_default_element_id_and_parent_id(self) -> None:
+        from docmeld.bronze.element_types import TableElement
+
+        elem = TableElement(
+            type="table", content="| A |\n|---|\n| 1 |", summary="", page_no=1
+        )
+        assert elem.element_id == ""
+        assert elem.parent_id == ""
 
     def test_empty_summary_allowed(self) -> None:
         from docmeld.bronze.element_types import TableElement
@@ -105,6 +156,16 @@ class TestImageElement:
         assert elem.type == "image"
         assert elem.image_name == "page001_image_001.png"
         assert elem.bbox == (0.0, 0.0, 100.0, 100.0)
+
+    def test_default_element_id_and_parent_id(self) -> None:
+        from docmeld.bronze.element_types import ImageElement
+
+        elem = ImageElement(
+            type="image", image_name="img.png", content="", image="aGVsbG8=",
+            image_id="img", bbox=(0.0, 0.0, 0.0, 0.0), page_no=1,
+        )
+        assert elem.element_id == ""
+        assert elem.parent_id == ""
 
     def test_empty_content_allowed(self) -> None:
         from docmeld.bronze.element_types import ImageElement

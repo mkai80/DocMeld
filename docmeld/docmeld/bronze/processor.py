@@ -17,7 +17,7 @@ logger = logging.getLogger("docmeld")
 class BronzeProcessor:
     """Orchestrates bronze-level PDF processing."""
 
-    def process_file(self, pdf_path: str) -> BronzeResult:
+    def process_file(self, pdf_path: str, backend: str = "pymupdf") -> BronzeResult:
         """Process a single PDF file into structured JSON elements.
 
         Creates an output folder next to the PDF, extracts elements,
@@ -61,7 +61,7 @@ class BronzeProcessor:
         doc.close()
 
         # Extract elements
-        elements = extract_elements(pdf_path, str(output_dir))
+        elements = extract_elements(pdf_path, str(output_dir), backend=backend)
 
         # Save JSON
         with open(output_json, "w", encoding="utf-8") as f:
@@ -77,7 +77,7 @@ class BronzeProcessor:
             skipped=False,
         )
 
-    def process_folder(self, folder_path: str) -> ProcessingResult:
+    def process_folder(self, folder_path: str, backend: str = "pymupdf") -> ProcessingResult:
         """Process all PDF files in a folder (fail-fast disabled).
 
         Continues processing remaining files even if one fails.
@@ -103,7 +103,7 @@ class BronzeProcessor:
         for i, pdf_file in enumerate(pdf_files, 1):
             logger.info(f"Processing {i}/{total}: {pdf_file.name}")
             try:
-                self.process_file(str(pdf_file))
+                self.process_file(str(pdf_file), backend=backend)
                 successful += 1
             except Exception as e:
                 failed += 1

@@ -21,17 +21,18 @@ class DocMeldParser:
     through bronze, silver, and gold stages.
     """
 
-    def __init__(self, path: str, output_dir: Optional[str] = None) -> None:
+    def __init__(self, path: str, output_dir: Optional[str] = None, backend: str = "pymupdf") -> None:
         self.path = path
         self.output_dir = output_dir
+        self.backend = backend
         self._is_folder = Path(path).is_dir()
 
     def process_bronze(self) -> BronzeResult | ProcessingResult:
         """Run bronze stage only."""
         processor = BronzeProcessor()
         if self._is_folder:
-            return processor.process_folder(self.path)
-        return processor.process_file(self.path)
+            return processor.process_folder(self.path, backend=self.backend)
+        return processor.process_file(self.path, backend=self.backend)
 
     def process_silver(self, bronze_json_path: str) -> SilverResult:
         """Run silver stage on a bronze JSON file."""
@@ -62,7 +63,7 @@ class DocMeldParser:
         silver_processor = SilverProcessor()
 
         if self._is_folder:
-            folder_result = bronze_processor.process_folder(self.path)
+            folder_result = bronze_processor.process_folder(self.path, backend=self.backend)
             # Process silver and gold for each successful bronze output
             folder = Path(self.path)
             for subdir in sorted(folder.iterdir()):
@@ -81,7 +82,7 @@ class DocMeldParser:
             folder_result.processing_time_seconds = round(elapsed, 2)
             return folder_result
         else:
-            bronze_result = bronze_processor.process_file(self.path)
+            bronze_result = bronze_processor.process_file(self.path, backend=self.backend)
             silver_result = silver_processor.process(bronze_result.output_path)
 
             gold_failed = False

@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- `element_id` and `parent_id` fields on all element types for cross-referencing and parent-child hierarchy
+- `table_data` structured dict on TableElement with headers, rows, num_rows, num_cols
+- `parse_table_data()` function to extract cell-level structure from markdown tables
+- `ParserBackend` protocol for swappable PDF parsing engines
+- `PyMuPDFBackend` — extracted from existing element_extractor logic
+- `DoclingBackend` — optional second engine (`pip install docmeld[docling]`)
+- `--backend` CLI flag on `bronze` and `process` commands (choices: pymupdf, docling)
+- `backend` parameter threaded through `DocMeldParser`, `BronzeProcessor`, and `extract_elements`
+- 35 new tests (144 total) covering new fields, backends, dispatch, and schema contract
+
 ## [0.1.0] - 2026-03-12
 
 ### Added

@@ -2,7 +2,8 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import List
+from typing import Any, Dict, List
+from unittest.mock import MagicMock, patch
 
 import pytest
 
@@ -92,3 +93,158 @@ class TestTableSummary:
         table_md = "| Name | Val |\n|------|-----|\n| A | 1 |\n| B | 2 |"
         summary = generate_table_summary(table_md)
         assert summary.startswith("Items: ")
+
+
+class TestParseTableData:
+    def test_basic_table(self) -> None:
+        from docmeld.bronze.element_extractor import parse_table_data
+
+        table_md = "| A | B |\n|---|---|\n| 1 | 2 |\n| 3 | 4 |"
+        result = parse_table_data(table_md)
+        assert result["headers"] == ["A", "B"]
+        assert result["rows"] == [["1", "2"], ["3", "4"]]
+        assert result["num_rows"] == 2
+        assert result["num_cols"] == 2
+
+    def test_empty_table(self) -> None:
+        from docmeld.bronze.element_extractor import parse_table_data
+
+        result = parse_table_data("")
+        assert result == {"headers": [], "rows": [], "num_rows": 0, "num_cols": 0}
+
+    def test_header_only_table(self) -> None:
+        from docmeld.bronze.element_extractor import parse_table_data
+
+        table_md = "| X | Y |\n|---|---|"
+        result = parse_table_data(table_md)
+        assert result["headers"] == ["X", "Y"]
+        assert result["rows"] == []
+        assert result["num_rows"] == 0
+        assert result["num_cols"] == 2
+
+    def test_single_column(self) -> None:
+        from docmeld.bronze.element_extractor import parse_table_data
+
+        table_md = "| Name |\n|------|\n| Alice |\n| Bob |"
+        result = parse_table_data(table_md)
+        assert result["headers"] == ["Name"]
+        assert result["num_cols"] == 1
+        assert result["num_rows"] == 2
+
+
+class TestAssignElementIds:
+    def test_sequential_ids(self) -> None:
+        from docmeld.bronze.element_extractor import _assign_element_ids
+
+        elements: List[Dict[str, Any]] = [
+            {"type": "title", "level": 0, "content": "A", "page_no": 1},
+            {"type": "text", "content": "B", "page_no": 1},
+            {"type": "table", "content": "C", "summary": "", "page_no": 1},
+        ]
+        _assign_element_ids(elements)
+        assert elements[0]["element_id"] == "e_001"
+        assert elements[1]["element_id"] == "e_002"
+        assert elements[2]["element_id"] == "e_003"
+
+    def test_empty_list(self) -> None:
+        from docmeld.bronze.element_extractor import _assign_element_ids
+
+        elements: List[Dict[str, Any]] = []
+        _assign_element_ids(elements)
+        assert elements == []
+
+
+class TestAssignParentIds:
+    def test_text_under_title(self) -> None:
+        from docmeld.bronze.element_extractor import _assign_element_ids, _assign_parent_ids
+
+        elements: List[Dict[str, Any]] = [
+            {"type": "title", "level": 0, "content": "H1", "page_no": 1},
+            {"type": "text", "content": "para", "page_no": 1},
+        ]
+        _assign_element_ids(elements)
+        _assign_parent_ids(elements)
+        assert elements[0]["parent_id"] == ""  # top-level title has no parent
+        assert elements[1]["parent_id"] == "e_001"
+
+    def test_nested_titles(self) -> None:
+        from docmeld.bronze.element_extractor import _assign_element_ids, _assign_parent_ids
+
+        elements: List[Dict[str, Any]] = [
+            {"type": "title", "level": 0, "content": "H1", "page_no": 1},
+            {"type": "title", "level": 1, "content": "H2", "page_no": 1},
+            {"type": "text", "content": "under H2", "page_no": 1},
+            {"type": "title", "level": 2, "content": "H3", "page_no": 1},
+            {"type": "text", "content": "under H3", "page_no": 1},
+        ]
+        _assign_element_ids(elements)
+        _assign_parent_ids(elements)
+        assert elements[0]["parent_id"] == ""       # H1 -> no parent
+        assert elements[1]["parent_id"] == "e_001"  # H2 -> H1
+        assert elements[2]["parent_id"] == "e_002"  # text -> H2 (deepest)
+        assert elements[3]["parent_id"] == "e_002"  # H3 -> H2
+        assert elements[4]["parent_id"] == "e_004"  # text -> H3
+
+    def test_sibling_titles_reset_deeper(self) -> None:
+        from docmeld.bronze.element_extractor import _assign_element_ids, _assign_parent_ids
+
+        elements: List[Dict[str, Any]] = [
+            {"type": "title", "level": 0, "content": "H1", "page_no": 1},
+            {"type": "title", "level": 1, "content": "H2a", "page_no": 1},
+            {"type": "title", "level": 0, "content": "H1b", "page_no": 2},
+            {"type": "text", "content": "under H1b", "page_no": 2},
+        ]
+        _assign_element_ids(elements)
+        _assign_parent_ids(elements)
+        assert elements[2]["parent_id"] == ""       # H1b -> no parent (level 0)
+        assert elements[3]["parent_id"] == "e_003"  # text -> H1b (H2a was cleared)
+
+    def test_no_titles(self) -> None:
+        from docmeld.bronze.element_extractor import _assign_element_ids, _assign_parent_ids
+
+        elements: List[Dict[str, Any]] = [
+            {"type": "text", "content": "orphan", "page_no": 1},
+        ]
+        _assign_element_ids(elements)
+        _assign_parent_ids(elements)
+        assert elements[0]["parent_id"] == ""
+
+
+class TestBackendDispatch:
+    def test_default_backend_is_pymupdf(self) -> None:
+        """Verify that extract_elements accepts a backend param defaulting to pymupdf."""
+        import inspect
+
+        from docmeld.bronze.element_extractor import extract_elements
+
+        sig = inspect.signature(extract_elements)
+        assert "backend" in sig.parameters
+        assert sig.parameters["backend"].default == "pymupdf"
+
+    def test_pymupdf_backend_dispatched(self) -> None:
+        """Verify pymupdf backend is instantiated for default backend."""
+        mock_backend_instance = MagicMock()
+        mock_backend_instance.extract_elements.return_value = []
+        mock_cls = MagicMock(return_value=mock_backend_instance)
+
+        mock_module = MagicMock()
+        mock_module.PyMuPDFBackend = mock_cls
+
+        with patch.dict("sys.modules", {"docmeld.bronze.backends.pymupdf_backend": mock_module}):
+            from docmeld.bronze import element_extractor
+            # Clear cached import
+            import importlib
+            importlib.reload(element_extractor)
+            element_extractor.extract_elements("/fake.pdf", "/fake_dir", backend="pymupdf")
+
+        mock_cls.assert_called_once()
+        mock_backend_instance.extract_elements.assert_called_once_with("/fake.pdf", "/fake_dir")
+
+    def test_docling_backend_import_error(self) -> None:
+        """Verify helpful error when docling is not installed."""
+        from docmeld.bronze.backends.docling_backend import DoclingBackend
+
+        backend = DoclingBackend()
+        with patch.dict("sys.modules", {"docling": None, "docling.document_converter": None}):
+            with pytest.raises(ImportError, match="Docling is not installed"):
+                backend.extract_elements("/fake.pdf", "/fake_dir")
