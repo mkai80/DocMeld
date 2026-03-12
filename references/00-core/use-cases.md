@@ -4,7 +4,7 @@ Status legend: `[PENDING]` | `[IN PROGRESS]` | `[DONE]` | `[BLOCKED]`
 
 ---
 
-## Use Case 1 — Research Papers General Reading [PENDING]
+## Use Case 1 — Research Papers General Reading [IN PROGRESS]
 
 **Branch**: `002-paper-batch-categorize`
 

@@ -5,6 +5,8 @@
 DocMeld is a lightweight PDF-to-agent-ready knowledge pipeline. Three-stage architecture: Bronze (PDF → JSON elements) → Silver (JSON → page-by-page JSONL) → Gold (JSONL → AI-enriched metadata).
 
 ## Active Technologies
+- Python 3.9+ + PyMuPDF (fitz), pymupdf4llm, pydantic, langchain-deepseek (all existing) (002-paper-batch-categorize)
+- Filesystem (JSON files) — no database (002-paper-batch-categorize)
 
 - Python 3.9+
 - PyMuPDF (fitz), pymupdf4llm, Docling (optional)
@@ -190,6 +192,7 @@ pytest tests/ -v
 - No secrets in committed files (.env, credentials, API keys)
 
 ## Recent Changes
+- 002-paper-batch-categorize: Added Python 3.9+ + PyMuPDF (fitz), pymupdf4llm, pydantic, langchain-deepseek (all existing)
 
 - 001-mvp-pdf-pipeline: MVP Bronze→Silver→Gold pipeline, 144 tests
   - ParserBackend abstraction (pymupdf + docling backends)

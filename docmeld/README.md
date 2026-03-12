@@ -1,161 +1,428 @@
-# DocMeld
+<p align="center">
+  <h1 align="center">DocMeld</h1>
+  <p align="center">Lightweight PDF to agent-ready knowledge pipeline</p>
+</p>
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
+<p align="center">
+  <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT"></a>
+  <a href="https://www.python.org/downloads/"><img src="https://img.shields.io/badge/python-3.9+-blue.svg" alt="Python 3.9+"></a>
+  <a href="https://github.com/psf/black"><img src="https://img.shields.io/badge/code%20style-black-000000.svg" alt="Code style: black"></a>
+  <a href="https://docs.astral.sh/ruff/"><img src="https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json" alt="Ruff"></a>
+  <a href="https://mypy-lang.org/"><img src="https://img.shields.io/badge/type%20checked-mypy-blue.svg" alt="Checked with mypy"></a>
+  <img src="https://img.shields.io/badge/tests-144%20passed-brightgreen.svg" alt="Tests: 144 passed">
+  <img src="https://img.shields.io/badge/coverage-81%25-green.svg" alt="Coverage: 81%">
+</p>
 
-**Lightweight PDF to agent-ready knowledge pipeline**
+<p align="center">
+  <a href="#quick-start">Quick Start</a> •
+  <a href="#pipeline-architecture">Architecture</a> •
+  <a href="#python-api">Python API</a> •
+  <a href="#cli-reference">CLI</a> •
+  <a href="#configuration">Configuration</a> •
+  <a href="#contributing">Contributing</a>
+</p>
 
-DocMeld converts PDF documents into structured, agent-consumable formats without requiring expensive OCR, VLM, or multimodal models. Built for the age of AI agents.
+---
 
-## Features
+DocMeld converts PDF documents into structured, agent-consumable formats through a three-stage pipeline — without requiring expensive OCR, VLM, or multimodal models. Built for the age of AI agents, it bridges the gap between static documents and the structured knowledge that LLMs need.
 
-- **🪶 Lightweight**: Uses only PyMuPDF (fitz) — no OCR/VLM required
-- **📄 Three-stage pipeline**: Bronze (elements) → Silver (pages) → Gold (AI metadata)
-- **🤖 Agent-ready outputs**: JSON, JSONL, and AI-enriched metadata
-- **⚡ Fast & local**: Runs entirely offline (except gold stage)
-- **🔄 Idempotent**: Skip re-processing of existing outputs
-- **📦 PyPI-ready**: `pip install docmeld`
+Most tools stop at format conversion. DocMeld goes further: **Document → Structured Elements → Page Knowledge → AI-Enriched Metadata**, producing outputs ready for RAG pipelines, agent systems, and downstream AI workflows.
 
-## Installation
+## Why DocMeld?
+
+| | DocMeld | MinerU | Docling | Marker | MarkItDown |
+|---|---|---|---|---|---|
+| No ML models required | ✅ | ❌ | ❌ | ❌ | ✅ |
+| Runs fully offline (core) | ✅ | ❌ | ✅ | ✅ | ✅ |
+| Agent-ready outputs | ✅ | ❌ | ❌ | ❌ | ❌ |
+| AI metadata enrichment | ✅ | ❌ | ❌ | ❌ | ❌ |
+| Lightweight install | ✅ | ❌ | ❌ | ❌ | ✅ |
+| MIT license | ✅ | ❌ (AGPL) | ✅ | ❌ (GPL) | ✅ |
+| Swappable backends | ✅ | ❌ | N/A | ❌ | ❌ |
+
+## Quick Start
+
+### Installation
 
 ```bash
 pip install docmeld
 ```
 
-## Quick Start
+With optional Docling backend:
 
-### Python API
+```bash
+pip install docmeld[docling]
+```
+
+### Process your first PDF
 
 ```python
 from docmeld import DocMeldParser
 
-# Process a single PDF through all stages
-parser = DocMeldParser("document.pdf")
+parser = DocMeldParser("research_paper.pdf")
 result = parser.process_all()
-print(f"Processed {result.successful} files")
+print(f"Processed {result.successful}/{result.total_files} files in {result.processing_time_seconds}s")
 ```
 
-### CLI
+Or from the command line:
 
 ```bash
-# Full pipeline
-docmeld process document.pdf
-
-# Individual stages
-docmeld bronze document.pdf
-docmeld silver document_abc123/document_abc123.json
-docmeld gold document_abc123/document_abc123.jsonl
+docmeld process research_paper.pdf
 ```
 
-## Pipeline Stages
+That's it. Your PDF is now structured JSON, page-by-page JSONL, and (optionally) AI-enriched metadata.
+
+## Pipeline Architecture
+
+DocMeld uses a three-stage medallion architecture. Each stage is independently runnable and idempotent — re-running skips already-processed files.
+
+```
+┌─────────────┐      ┌─────────────┐      ┌─────────────┐
+│   BRONZE    │      │   SILVER    │      │    GOLD     │
+│             │      │             │      │             │
+│  PDF → JSON │─────▶│ JSON → JSONL│─────▶│ JSONL → AI  │
+│  elements   │      │  pages      │      │  metadata   │
+│             │      │             │      │             │
+│  PyMuPDF /  │      │  Title      │      │  DeepSeek   │
+│  Docling    │      │  hierarchy  │      │  enrichment │
+└─────────────┘      └─────────────┘      └─────────────┘
+   offline              offline            requires API key
+```
 
 ### Bronze: PDF → Structured JSON
 
-Extracts elements (text, tables, titles, images) from PDFs:
+Extracts document elements (titles, text, tables, images) into a unified JSON format with element IDs and parent-child hierarchy.
 
 ```json
 [
-  {"type": "title", "level": 0, "content": "Executive Summary", "page_no": 1},
-  {"type": "text", "content": "The company reported...", "page_no": 1},
-  {"type": "table", "content": "| Metric | Value |...", "summary": "Items: Revenue, EBITDA", "page_no": 2}
+  {
+    "type": "title",
+    "level": 0,
+    "content": "Executive Summary",
+    "page_no": 1,
+    "element_id": "e_001",
+    "parent_id": ""
+  },
+  {
+    "type": "text",
+    "content": "The company reported strong Q2 results...",
+    "page_no": 1,
+    "element_id": "e_002",
+    "parent_id": "e_001"
+  },
+  {
+    "type": "table",
+    "content": "| Metric | Q1 | Q2 |\n|---|---|---|\n| Revenue | 10M | 15M |",
+    "summary": "Items: Revenue",
+    "page_no": 2,
+    "element_id": "e_003",
+    "parent_id": "e_001",
+    "table_data": {
+      "headers": ["Metric", "Q1", "Q2"],
+      "rows": [["Revenue", "10M", "15M"]],
+      "num_rows": 1,
+      "num_cols": 3
+    }
+  }
 ]
 ```
 
+Supported element types:
+
+| Type | Fields | Description |
+|---|---|---|
+| `title` | `level`, `content` | Headings with hierarchy (0–5) |
+| `text` | `content` | Paragraph content |
+| `table` | `content`, `summary`, `table_data` | Markdown tables with structured data |
+| `image` | `image_name`, `image`, `bbox`, `image_id` | Base64-encoded images with metadata |
+
+All elements include `page_no`, `element_id`, and `parent_id` for cross-referencing.
+
 ### Silver: JSON → Page-by-Page JSONL
 
-Transforms elements into page-based documents with title hierarchy:
+Transforms flat element lists into self-contained page documents with title hierarchy tracking, markdown rendering, and global table numbering.
 
 ```json
 {
   "metadata": {
-    "uuid": "...",
-    "source": "document.pdf",
+    "uuid": "a1b2c3d4-...",
+    "source": "research_paper.pdf",
     "page_no": "page1",
     "session_title": "# Executive Summary\n"
   },
-  "page_content": "# Executive Summary\n\nThe company reported..."
+  "page_content": "# Executive Summary\n\nThe company reported strong Q2 results...\n\n[[Table1]]\n| Metric | Q1 | Q2 |\n|---|---|---|\n| Revenue | 10M | 15M |\n[/Table1]"
 }
 ```
 
+Each page carries its full title context, so pages are independently meaningful — ideal for chunked retrieval in RAG systems.
+
 ### Gold: JSONL → AI-Enriched Metadata
 
-Adds descriptions and keywords using DeepSeek-chat:
+Adds semantic descriptions and keywords to each page using DeepSeek-chat, with exponential backoff retry and per-page error resilience.
 
 ```json
 {
   "metadata": {
-    "description": "Company reports strong Q2 results with revenue growth",
-    "keywords": ["revenue", "EBITDA", "quarterly results", "growth"]
-  }
+    "uuid": "a1b2c3d4-...",
+    "source": "research_paper.pdf",
+    "page_no": "page1",
+    "session_title": "# Executive Summary\n",
+    "description": "Company reports strong Q2 results with 50% revenue growth",
+    "keywords": ["revenue", "quarterly results", "growth", "financial performance"]
+  },
+  "page_content": "..."
 }
+```
+
+The gold stage is optional — bronze and silver run fully offline with zero API calls.
+
+## Output Structure
+
+After processing `research_paper.pdf`:
+
+```
+research_paper.pdf                              # Original (untouched)
+research_paper_a3f5c2/                          # Output folder (name + MD5 suffix)
+├── research_paper_a3f5c2.json                  # Bronze: structured elements
+├── research_paper_a3f5c2.jsonl                 # Silver: page-by-page documents
+└── research_paper_a3f5c2_gold.jsonl            # Gold: AI-enriched (optional)
+```
+
+Output folder names are sanitized and include an MD5 hash suffix for uniqueness, ensuring safe cross-platform filenames even for PDFs with unicode or special characters.
+
+## Python API
+
+### Full Pipeline
+
+```python
+from docmeld import DocMeldParser
+
+# Single file — all three stages
+parser = DocMeldParser("paper.pdf")
+result = parser.process_all()
+
+# Batch — process every PDF in a folder
+parser = DocMeldParser("/path/to/papers/")
+result = parser.process_all()
+print(f"{result.successful}/{result.total_files} files, {result.processing_time_seconds}s")
+```
+
+### Individual Stages
+
+```python
+from docmeld import DocMeldParser
+
+parser = DocMeldParser("paper.pdf")
+
+# Bronze only
+bronze = parser.process_bronze()
+print(f"{bronze.element_count} elements across {bronze.page_count} pages")
+print(f"Output: {bronze.output_path}")
+
+# Silver (requires bronze output)
+silver = parser.process_silver(bronze.output_path)
+print(f"{silver.page_count} pages → {silver.output_path}")
+
+# Gold (requires silver output + API key)
+gold = parser.process_gold(silver.output_path)
+print(f"{gold.pages_enriched} enriched, {gold.pages_failed} failed")
+```
+
+### Swappable Backends
+
+DocMeld supports multiple PDF parsing backends through a pluggable architecture:
+
+```python
+# Default: PyMuPDF (lightweight, fast)
+parser = DocMeldParser("paper.pdf", backend="pymupdf")
+
+# Alternative: Docling (IBM's ML-powered parser, better for complex layouts)
+parser = DocMeldParser("paper.pdf", backend="docling")
+```
+
+### Working with Elements
+
+```python
+import json
+
+# Load bronze output
+with open("paper_a3f5c2/paper_a3f5c2.json") as f:
+    elements = json.load(f)
+
+# Filter by type
+titles = [e for e in elements if e["type"] == "title"]
+tables = [e for e in elements if e["type"] == "table"]
+
+# Navigate hierarchy via parent_id
+for elem in elements:
+    if elem["parent_id"] == "e_001":
+        print(f"  Child of first title: {elem['content'][:50]}")
+
+# Access structured table data
+for table in tables:
+    headers = table["table_data"]["headers"]
+    rows = table["table_data"]["rows"]
+    print(f"Table: {len(rows)} rows × {len(headers)} cols")
+```
+
+### Result Models
+
+All pipeline stages return typed Pydantic models:
+
+```python
+BronzeResult(output_path, output_dir, element_count, page_count, skipped)
+SilverResult(output_path, page_count, skipped)
+GoldResult(output_path, pages_enriched, pages_failed, skipped)
+ProcessingResult(total_files, successful, failed, failures, processing_time_seconds, ...)
+```
+
+## CLI Reference
+
+```bash
+# Full pipeline (bronze → silver → gold)
+docmeld process paper.pdf
+docmeld process /path/to/papers/
+
+# Individual stages
+docmeld bronze paper.pdf                    # PDF → JSON
+docmeld silver paper_a3f5c2/paper_a3f5c2.json    # JSON → JSONL
+docmeld gold paper_a3f5c2/paper_a3f5c2.jsonl     # JSONL → enriched JSONL
+
+# Choose parsing backend
+docmeld bronze paper.pdf --backend docling
+docmeld process paper.pdf --backend pymupdf       # default
 ```
 
 ## Configuration
 
-Create `.env.local` for gold stage (AI enrichment):
+### Gold Stage (AI Enrichment)
+
+Create a `.env.local` file in your working directory:
 
 ```bash
 DEEPSEEK_API_KEY=your_key_here
-# Optional: custom endpoint
+
+# Optional: custom API endpoint
 # DEEPSEEK_API_ENDPOINT=https://api.deepseek.com
 ```
 
-## Output Structure
+The gold stage is entirely optional. Bronze and silver stages run offline with no API keys, no network calls, and no model downloads.
 
-After processing `research_report.pdf`:
+### Logging
 
+DocMeld writes timestamped log files (`docmeld_YYYYMMDD_HHMMSS.log`) to the working directory. Console output shows INFO-level messages; log files capture full DEBUG output.
+
+## Unified Element Schema
+
+DocMeld enforces a strict element schema via Pydantic models. This contract guarantees downstream consumers always get a predictable structure.
+
+```python
+from docmeld.bronze.element_types import (
+    TitleElement,    # type, level, content, page_no, element_id, parent_id
+    TextElement,     # type, content, page_no, element_id, parent_id
+    TableElement,    # type, content, summary, page_no, element_id, parent_id, table_data
+    ImageElement,    # type, image_name, content, image, image_id, bbox, page_no, element_id, parent_id
+)
 ```
-research_report.pdf                          # Original PDF
-research_report_a3f5c2/                      # Output folder
-├── research_report_a3f5c2.json              # Bronze: element list
-├── research_report_a3f5c2.jsonl             # Silver: page-by-page
-└── research_report_a3f5c2_gold.jsonl        # Gold: AI-enriched
-docmeld_20260312_143022.log                  # Processing log
-```
+
+Element types are validated at creation time. New types may be added in minor versions, but existing types will never change shape in minor/patch releases.
 
 ## Roadmap
 
-- [x] MVP: Bronze, Silver, Gold pipeline
-- [x] CLI interface
-- [x] PyPI package
-- [ ] DOCX support
-- [ ] OCR for scanned PDFs (optional extra)
+- [x] Bronze → Silver → Gold pipeline
+- [x] CLI interface with subcommands
+- [x] Swappable backends (PyMuPDF + Docling)
+- [x] Element hierarchy (`element_id` / `parent_id`)
+- [x] Structured table data extraction
+- [x] Idempotent processing
+- [x] Batch folder processing
+- [ ] Research paper batch categorization
+- [ ] Paper-to-PRD generation
+- [ ] Paper-to-workflow extraction
+- [ ] Book-to-Claude-Skills generation
+- [ ] DOCX / PPTX support
+- [ ] OCR for scanned PDFs (`pip install docmeld[ocr]`)
 - [ ] Agent prompt generation
-- [ ] Claude skill generation
+- [ ] LangChain / LlamaIndex integration
 
 ## Development
 
+### Setup
+
 ```bash
-# Clone and setup
 git clone https://github.com/[username]/docmeld.git
 cd docmeld
 python3 -m venv venv
 source venv/bin/activate
 pip install -e ".[dev]"
+```
 
-# Run tests
-pytest --cov=docmeld
+### Quality Gates
 
-# Lint and format
-ruff check docmeld/
-black docmeld/
-mypy docmeld/
+```bash
+pytest tests/ -v --cov=docmeld       # 144 tests, 81% coverage
+ruff check docmeld/                   # Linting
+black --check docmeld/                # Formatting
+mypy docmeld/                         # Strict type checking
+```
+
+### Project Structure
+
+```
+docmeld/
+├── docmeld/
+│   ├── __init__.py              # Public API (DocMeldParser, __version__)
+│   ├── parser.py                # Pipeline orchestrator
+│   ├── cli.py                   # CLI entry point (argparse)
+│   ├── bronze/
+│   │   ├── backends/
+│   │   │   ├── pymupdf_backend.py   # PyMuPDF + pymupdf4llm
+│   │   │   └── docling_backend.py   # Docling (optional)
+│   │   ├── element_extractor.py     # Extraction + post-processing
+│   │   ├── element_types.py         # Pydantic element models
+│   │   ├── filename_sanitizer.py    # Safe filenames + MD5 hashing
+│   │   └── processor.py            # Bronze orchestrator
+│   ├── silver/
+│   │   ├── page_aggregator.py       # Group elements by page
+│   │   ├── page_models.py          # Result models (Pydantic)
+│   │   ├── markdown_renderer.py     # Elements → markdown
+│   │   ├── title_tracker.py         # Title hierarchy state
+│   │   └── processor.py            # Silver orchestrator
+│   ├── gold/
+│   │   ├── deepseek_client.py       # API client + retry logic
+│   │   ├── metadata_extractor.py    # Content → description + keywords
+│   │   └── processor.py            # Gold orchestrator
+│   └── utils/
+│       ├── env_loader.py            # .env.local loading
+│       ├── logging.py               # Timestamped log setup
+│       └── progress.py              # Progress indicators
+├── tests/                       # Unit, integration, contract tests
+├── pyproject.toml
+├── CONTRIBUTING.md
+├── CHANGELOG.md
+└── LICENSE                      # MIT
 ```
 
 ## Contributing
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for development guidelines.
+We welcome contributions. See [CONTRIBUTING.md](CONTRIBUTING.md) for the full guide. The short version:
+
+1. Fork and clone
+2. Write tests first (TDD is non-negotiable)
+3. Run all quality gates before pushing
+4. Open a PR with a clear description
 
 ## License
 
-MIT License - see [LICENSE](LICENSE) for details.
+MIT License — see [LICENSE](LICENSE) for details.
 
 ## Citation
 
 ```bibtex
 @software{docmeld2026,
-  title = {DocMeld: Lightweight PDF to Agent-Ready Knowledge Pipeline},
-  year = {2026},
-  url = {https://github.com/[username]/docmeld}
+  title     = {DocMeld: Lightweight PDF to Agent-Ready Knowledge Pipeline},
+  year      = {2026},
+  license   = {MIT},
+  url       = {https://github.com/[username]/docmeld}
 }
 ```
