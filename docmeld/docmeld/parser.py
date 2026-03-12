@@ -8,7 +8,7 @@ from pathlib import Path
 from typing import Optional
 
 from docmeld.bronze.processor import BronzeProcessor
-from docmeld.silver.page_models import BronzeResult, GoldResult, ProcessingResult, SilverResult
+from docmeld.silver.page_models import BronzeResult, CategorizeResult, GoldResult, ProcessingResult, SilverResult
 from docmeld.silver.processor import SilverProcessor
 
 logger = logging.getLogger("docmeld")
@@ -102,3 +102,84 @@ class DocMeldParser:
                 output_directory=bronze_result.output_dir,
                 log_file="",
             )
+
+    def process_categorize(self, reorganize: bool = False) -> CategorizeResult:
+        """Run full pipeline + categorization on a folder of PDFs.
+
+        Processes all PDFs through bronze→silver→gold, aggregates gold
+        metadata, clusters papers into categories via DeepSeek, and
+        writes categories.json. Optionally reorganizes files.
+
+        Args:
+            reorganize: If True, move files into category subdirectories.
+
+        Returns:
+            CategorizeResult with index path and statistics.
+        """
+        if not self._is_folder:
+            raise ValueError("process_categorize() requires a folder path, not a single file")
+
+        folder = Path(self.path)
+        if not folder.exists():
+            raise FileNotFoundError(f"Folder not found: {self.path}")
+
+        pdf_files = list(folder.glob("*.pdf")) + list(folder.glob("*.PDF"))
+        if not pdf_files:
+            logger.warning(f"No PDFs found in {self.path}")
+            return CategorizeResult(
+                index_path="",
+                total_papers=0,
+                total_categories=0,
+                papers_failed=0,
+                reorganized=False,
+            )
+
+        # Step 1: Run full pipeline (bronze → silver → gold)
+        logger.info(f"Processing {len(pdf_files)} PDFs through full pipeline...")
+        self.process_all()
+
+        # Step 2: Aggregate gold metadata
+        from docmeld.categorize.aggregator import aggregate_paper_metadata
+
+        papers = aggregate_paper_metadata(self.path)
+        if not papers:
+            logger.warning("No gold metadata found to categorize")
+            return CategorizeResult(
+                index_path="",
+                total_papers=0,
+                total_categories=0,
+                papers_failed=0,
+                reorganized=False,
+            )
+
+        # Step 3: Categorize via DeepSeek
+        from docmeld.categorize.categorizer import categorize_papers
+        from docmeld.gold.deepseek_client import DeepSeekClient
+        from docmeld.utils.env_loader import load_env
+
+        env = load_env(require_api_key=True)
+        client = DeepSeekClient(
+            api_key=env["DEEPSEEK_API_KEY"],
+            endpoint=env.get("DEEPSEEK_API_ENDPOINT"),
+        )
+
+        categories = categorize_papers(papers, client)
+
+        # Step 4: Write categories.json
+        from docmeld.categorize.index_writer import write_category_index
+
+        index_path = write_category_index(self.path, papers, categories)
+
+        # Step 5: Optionally reorganize
+        if reorganize:
+            from docmeld.categorize.reorganizer import reorganize_by_category
+
+            reorganize_by_category(self.path)
+
+        return CategorizeResult(
+            index_path=index_path,
+            total_papers=len(papers),
+            total_categories=len(categories),
+            papers_failed=0,
+            reorganized=reorganize,
+        )

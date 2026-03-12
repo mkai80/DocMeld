@@ -24,9 +24,9 @@
 
 **Purpose**: Create the categorize module structure and shared models
 
-- [ ] T001 Create categorize module directory and `__init__.py` at `docmeld/docmeld/categorize/__init__.py`
-- [ ] T002 Add Pydantic models for PaperMetadata, Category, PaperEntry, CategoryIndex in `docmeld/docmeld/categorize/models.py` per data-model.md
-- [ ] T003 [P] Add CategorizeResult model to `docmeld/docmeld/silver/page_models.py` with fields: index_path, total_papers, total_categories, papers_failed, reorganized
+- [x] T001 Create categorize module directory and `__init__.py` at `docmeld/docmeld/categorize/__init__.py`
+- [x] T002 Add Pydantic models for PaperMetadata, Category, PaperEntry, CategoryIndex in `docmeld/docmeld/categorize/models.py` per data-model.md
+- [x] T003 [P] Add CategorizeResult model to `docmeld/docmeld/silver/page_models.py` with fields: index_path, total_papers, total_categories, papers_failed, reorganized
 
 ---
 
@@ -36,11 +36,11 @@
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T004 [P] Write unit tests for aggregator in `docmeld/tests/unit/test_aggregator.py`: test scanning gold JSONL files, collecting metadata, handling missing/empty files, deduplicating keywords
-- [ ] T005 [P] Write unit tests for categorizer in `docmeld/tests/unit/test_categorizer.py`: test prompt construction, response parsing, deterministic sorting, error handling for malformed API responses
-- [ ] T006 Implement aggregator in `docmeld/docmeld/categorize/aggregator.py`: scan a folder for `*_gold.jsonl` files, parse each file to collect per-paper description + keywords, return list of PaperMetadata
-- [ ] T007 Implement categorizer in `docmeld/docmeld/categorize/categorizer.py`: accept list of PaperMetadata, sort by filename, build JSON prompt, call DeepSeek with temperature=0, parse response into list of Category assignments
-- [ ] T008 Add `categorize_papers()` method to `docmeld/docmeld/gold/deepseek_client.py`: accepts aggregated paper metadata JSON string, returns category assignments JSON, uses temperature=0 for determinism
+- [x] T004 [P] Write unit tests for aggregator in `docmeld/tests/unit/test_aggregator.py`: test scanning gold JSONL files, collecting metadata, handling missing/empty files, deduplicating keywords
+- [x] T005 [P] Write unit tests for categorizer in `docmeld/tests/unit/test_categorizer.py`: test prompt construction, response parsing, deterministic sorting, error handling for malformed API responses
+- [x] T006 Implement aggregator in `docmeld/docmeld/categorize/aggregator.py`: scan a folder for `*_gold.jsonl` files, parse each file to collect per-paper description + keywords, return list of PaperMetadata
+- [x] T007 Implement categorizer in `docmeld/docmeld/categorize/categorizer.py`: accept list of PaperMetadata, sort by filename, build JSON prompt, call DeepSeek with temperature=0, parse response into list of Category assignments
+- [x] T008 Add `categorize_papers()` method to `docmeld/docmeld/gold/deepseek_client.py`: accepts aggregated paper metadata JSON string, returns category assignments JSON, uses temperature=0 for determinism
 
 **Checkpoint**: Aggregator can collect metadata, categorizer can cluster papers via API
 
@@ -56,15 +56,15 @@
 
 > **NOTE: Write these tests FIRST, ensure they FAIL before implementation**
 
-- [ ] T009 [P] [US1] Integration test for batch full-pipeline in `docmeld/tests/integration/test_categorize_pipeline.py`: test that `process_categorize()` on a folder of 3 sample PDFs produces bronze+silver+gold outputs for each
-- [ ] T010 [P] [US1] Integration test for idempotency in `docmeld/tests/integration/test_categorize_pipeline.py`: test that running twice skips already-processed PDFs
-- [ ] T011 [P] [US1] Integration test for error resilience in `docmeld/tests/integration/test_categorize_pipeline.py`: test that one corrupted PDF doesn't block processing of others
+- [x] T009 [P] [US1] Integration test for batch full-pipeline in `docmeld/tests/integration/test_categorize_pipeline.py`: test that `process_categorize()` on a folder of 3 sample PDFs produces bronze+silver+gold outputs for each
+- [x] T010 [P] [US1] Integration test for idempotency in `docmeld/tests/integration/test_categorize_pipeline.py`: test that running twice skips already-processed PDFs
+- [x] T011 [P] [US1] Integration test for error resilience in `docmeld/tests/integration/test_categorize_pipeline.py`: test that one corrupted PDF doesn't block processing of others
 
 ### Implementation for User Story 1
 
-- [ ] T012 [US1] Add `process_categorize(reorganize=False)` method to `docmeld/docmeld/parser.py`: orchestrates full pipeline (process_all + aggregate + categorize + write index), returns CategorizeResult
-- [ ] T013 [US1] Add `categorize` subcommand to `docmeld/docmeld/cli.py`: accepts folder path, `--reorganize` flag, `--backend` flag, calls `DocMeldParser.process_categorize()`
-- [ ] T014 [US1] Update `docmeld/docmeld/__init__.py` to export categorize module
+- [x] T012 [US1] Add `process_categorize(reorganize=False)` method to `docmeld/docmeld/parser.py`: orchestrates full pipeline (process_all + aggregate + categorize + write index), returns CategorizeResult
+- [x] T013 [US1] Add `categorize` subcommand to `docmeld/docmeld/cli.py`: accepts folder path, `--reorganize` flag, `--backend` flag, calls `DocMeldParser.process_categorize()`
+- [x] T014 [US1] Update `docmeld/docmeld/__init__.py` to export categorize module
 
 **Checkpoint**: `docmeld categorize /path/to/papers/` processes all PDFs through bronze→silver→gold
 
@@ -80,15 +80,15 @@
 
 > **NOTE: Write these tests FIRST, ensure they FAIL before implementation**
 
-- [ ] T015 [P] [US2] Unit test for index_writer in `docmeld/tests/unit/test_index_writer.py`: test writing valid categories.json, test schema compliance, test deterministic output
-- [ ] T016 [P] [US2] Contract test for categories.json schema in `docmeld/tests/contract/test_categories_schema.py`: validate output against `specs/002-paper-batch-categorize/contracts/categories-schema.json`
-- [ ] T017 [P] [US2] Integration test for categorization in `docmeld/tests/integration/test_categorize_pipeline.py`: test that categories.json is created after gold processing, test determinism (same input → same output)
+- [x] T015 [P] [US2] Unit test for index_writer in `docmeld/tests/unit/test_index_writer.py`: test writing valid categories.json, test schema compliance, test deterministic output
+- [x] T016 [P] [US2] Contract test for categories.json schema in `docmeld/tests/contract/test_categories_schema.py`: validate output against `specs/002-paper-batch-categorize/contracts/categories-schema.json`
+- [x] T017 [P] [US2] Integration test for categorization in `docmeld/tests/integration/test_categorize_pipeline.py`: test that categories.json is created after gold processing, test determinism (same input → same output)
 
 ### Implementation for User Story 2
 
-- [ ] T018 [US2] Implement index_writer in `docmeld/docmeld/categorize/index_writer.py`: accept list of PaperMetadata + category assignments, build CategoryIndex, write `categories.json` to folder root
-- [ ] T019 [US2] Wire categorization into `process_categorize()` in `docmeld/docmeld/parser.py`: after process_all completes, call aggregator → categorizer → index_writer
-- [ ] T020 [US2] Add progress logging for categorization step in `docmeld/docmeld/categorize/categorizer.py`
+- [x] T018 [US2] Implement index_writer in `docmeld/docmeld/categorize/index_writer.py`: accept list of PaperMetadata + category assignments, build CategoryIndex, write `categories.json` to folder root
+- [x] T019 [US2] Wire categorization into `process_categorize()` in `docmeld/docmeld/parser.py`: after process_all completes, call aggregator → categorizer → index_writer
+- [x] T020 [US2] Add progress logging for categorization step in `docmeld/docmeld/categorize/categorizer.py`
 
 **Checkpoint**: `docmeld categorize /path/` produces `categories.json` with topic clusters
 
@@ -104,14 +104,14 @@
 
 > **NOTE: Write these tests FIRST, ensure they FAIL before implementation**
 
-- [ ] T021 [P] [US3] Unit test for reorganizer in `docmeld/tests/unit/test_reorganizer.py`: test file moving, test category name sanitization, test idempotency (already reorganized), test special characters in category names
-- [ ] T022 [P] [US3] Integration test for reorganize in `docmeld/tests/integration/test_categorize_pipeline.py`: test end-to-end with `--reorganize` flag
+- [x] T021 [P] [US3] Unit test for reorganizer in `docmeld/tests/unit/test_reorganizer.py`: test file moving, test category name sanitization, test idempotency (already reorganized), test special characters in category names
+- [x] T022 [P] [US3] Integration test for reorganize in `docmeld/tests/integration/test_categorize_pipeline.py`: test end-to-end with `--reorganize` flag
 
 ### Implementation for User Story 3
 
-- [ ] T023 [US3] Implement reorganizer in `docmeld/docmeld/categorize/reorganizer.py`: read categories.json, sanitize category names, create subdirectories, move PDFs + output folders, write `_reorganized.json` manifest
-- [ ] T024 [US3] Wire reorganize into `process_categorize(reorganize=True)` in `docmeld/docmeld/parser.py`
-- [ ] T025 [US3] Add `--reorganize` flag handling in `docmeld/docmeld/cli.py` categorize subcommand
+- [x] T023 [US3] Implement reorganizer in `docmeld/docmeld/categorize/reorganizer.py`: read categories.json, sanitize category names, create subdirectories, move PDFs + output folders, write `_reorganized.json` manifest
+- [x] T024 [US3] Wire reorganize into `process_categorize(reorganize=True)` in `docmeld/docmeld/parser.py`
+- [x] T025 [US3] Add `--reorganize` flag handling in `docmeld/docmeld/cli.py` categorize subcommand
 
 **Checkpoint**: `docmeld categorize /path/ --reorganize` moves files into category subdirectories
 
@@ -121,10 +121,10 @@
 
 **Purpose**: Edge cases, documentation, final validation
 
-- [ ] T026 [P] Handle edge case: zero PDFs in folder — report "no PDFs found" and exit gracefully in `docmeld/docmeld/parser.py`
-- [ ] T027 [P] Handle edge case: folder path does not exist — clear error message in `docmeld/docmeld/cli.py`
-- [ ] T028 Update CHANGELOG.md with 002-paper-batch-categorize entries in `docmeld/CHANGELOG.md`
-- [ ] T029 Run full test suite: `pytest tests/ -v --cov=docmeld` — all tests must pass, coverage must not regress
+- [x] T026 [P] Handle edge case: zero PDFs in folder — report "no PDFs found" and exit gracefully in `docmeld/docmeld/parser.py`
+- [x] T027 [P] Handle edge case: folder path does not exist — clear error message in `docmeld/docmeld/cli.py`
+- [x] T028 Update CHANGELOG.md with 002-paper-batch-categorize entries in `docmeld/CHANGELOG.md`
+- [x] T029 Run full test suite: `pytest tests/ -v --cov=docmeld` — all tests must pass, coverage must not regress
 - [ ] T030 Run linting: `ruff check docmeld/` and `black --check docmeld/` — zero errors
 
 ---

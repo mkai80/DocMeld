@@ -1,0 +1,46 @@
+"""Pydantic models for the categorize module."""
+from __future__ import annotations
+
+from typing import List
+
+from pydantic import BaseModel, Field
+
+
+class PaperMetadata(BaseModel):
+    """Aggregated metadata for a single paper from its gold JSONL output."""
+
+    filename: str
+    file_path: str
+    output_dir: str
+    description: str
+    keywords: List[str] = Field(default_factory=list)
+    page_count: int = 0
+    gold_path: str = ""
+
+
+class Category(BaseModel):
+    """A topic cluster identified by the AI model."""
+
+    name: str
+    papers: List[str] = Field(default_factory=list)
+    keywords: List[str] = Field(default_factory=list)
+
+
+class PaperEntry(BaseModel):
+    """A single paper's entry in the category index."""
+
+    filename: str
+    category: str
+    description: str
+    keywords: List[str] = Field(default_factory=list)
+
+
+class CategoryIndex(BaseModel):
+    """Top-level structure written to categories.json."""
+
+    created: str
+    source_folder: str
+    total_papers: int
+    total_categories: int
+    categories: List[Category] = Field(default_factory=list)
+    papers: List[PaperEntry] = Field(default_factory=list)

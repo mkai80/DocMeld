@@ -63,3 +63,11 @@ class GoldResult(BaseModel):
     pages_enriched: int
     pages_failed: int
     skipped: bool = False
+
+
+class CategorizeResult(BaseModel):
+    index_path: str
+    total_papers: int
+    total_categories: int
+    papers_failed: int = 0
+    reorganized: bool = False

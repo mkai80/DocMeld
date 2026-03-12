@@ -42,6 +42,21 @@ def main(args: list[str] | None = None) -> int:
     p_gold = subparsers.add_parser("gold", help="Run gold stage only (JSONL → enriched JSONL)")
     p_gold.add_argument("path", help="Path to silver JSONL file")
 
+    # categorize
+    p_cat = subparsers.add_parser("categorize", help="Batch process + categorize papers by topic")
+    p_cat.add_argument("path", help="Path to folder of PDFs")
+    p_cat.add_argument(
+        "--backend",
+        choices=["pymupdf", "docling"],
+        default="pymupdf",
+        help="PDF parsing backend (default: pymupdf)",
+    )
+    p_cat.add_argument(
+        "--reorganize",
+        action="store_true",
+        help="Move files into category subdirectories",
+    )
+
     parsed = parser.parse_args(args)
 
     if not parsed.command:
@@ -91,6 +106,22 @@ def main(args: list[str] | None = None) -> int:
             result = doc.process_gold(path)
             print(f"Gold: {result.pages_enriched} enriched, {result.pages_failed} failed")
             print(f"Output: {result.output_path}")
+
+        elif parsed.command == "categorize":
+            if not Path(path).is_dir():
+                print(f"Error: categorize requires a folder path, got: {path}", file=sys.stderr)
+                return 1
+            backend = getattr(parsed, "backend", "pymupdf")
+            reorganize = getattr(parsed, "reorganize", False)
+            doc = DocMeldParser(path, backend=backend)
+            result = doc.process_categorize(reorganize=reorganize)
+            if result.total_papers == 0:
+                print("No PDFs found to categorize")
+            else:
+                print(f"Categorized {result.total_papers} papers into {result.total_categories} categories")
+                print(f"Index: {result.index_path}")
+                if result.reorganized:
+                    print("Files reorganized into category subdirectories")
 
     except Exception as e:
         logger.error(f"Pipeline error: {e}")

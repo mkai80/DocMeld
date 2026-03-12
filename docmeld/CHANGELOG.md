@@ -16,6 +16,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `DoclingBackend` — optional second engine (`pip install docmeld[docling]`)
 - `--backend` CLI flag on `bronze` and `process` commands (choices: pymupdf, docling)
 - `backend` parameter threaded through `DocMeldParser`, `BronzeProcessor`, and `extract_elements`
+- `docmeld categorize` command — batch process PDFs + topic clustering + `categories.json` index
+- `categorize/` module: aggregator, categorizer, index_writer, reorganizer
+- `process_categorize(reorganize=False)` method on `DocMeldParser`
+- `--reorganize` flag to move files into category subdirectories
+- `CategorizeResult` model for categorization output
+- `categories.json` schema contract
+- `DoclingBackend` — optional second engine (`pip install docmeld[docling]`)
+- `--backend` CLI flag on `bronze` and `process` commands (choices: pymupdf, docling)
+- `backend` parameter threaded through `DocMeldParser`, `BronzeProcessor`, and `extract_elements`
 - 35 new tests (144 total) covering new fields, backends, dispatch, and schema contract
 
 ## [0.1.0] - 2026-03-12

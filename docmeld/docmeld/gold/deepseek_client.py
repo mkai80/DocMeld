@@ -112,3 +112,36 @@ class DeepSeekClient:
             "description": result.get("description", ""),
             "keywords": result.get("keywords", []),
         }
+
+    def categorize_papers(self, prompt: str) -> str:
+        """Send a categorization prompt and return the raw response text.
+
+        Uses temperature=0 for deterministic output.
+
+        Args:
+            prompt: The full categorization prompt with paper metadata.
+
+        Returns:
+            Raw response text from the API.
+        """
+        return call_with_retry(
+            lambda: self._call_categorize_api(prompt),
+            max_retries=3,
+            base_delay=1.0,
+        )
+
+    def _call_categorize_api(self, prompt: str) -> str:
+        """Make the actual API call for categorization."""
+        from langchain_deepseek import ChatDeepSeek
+
+        kwargs: Dict[str, Any] = {
+            "model": "deepseek-chat",
+            "temperature": 0,  # Deterministic for categorization
+            "api_key": self.api_key,
+        }
+        if self.endpoint:
+            kwargs["base_url"] = self.endpoint
+
+        llm = ChatDeepSeek(**kwargs)
+        response = llm.invoke(prompt)
+        return str(response.content).strip()
