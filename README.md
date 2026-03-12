@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/banner.png" alt="DocMeld Banner" width="100%">
+  <img src="docmeld/assets/banner.png" alt="DocMeld Banner" width="100%">
 </p>
 
 <h1 align="center">DocMeld</h1>

@@ -1,0 +1,157 @@
+2026-03-12 19:29:22,249 - INFO - Logging to /Users/frank/A/DocMeld/docmeld_20260312_192922.log
+2026-03-12 19:29:22,250 - INFO - Processing 16 PDFs through full pipeline...
+2026-03-12 19:29:22,250 - INFO - Processing 1/16: 2305.07489 Benchmarks and leaderboards for sound demixing tasks.pdf
+2026-03-12 19:29:23,925 - INFO - Bronze: 2305.07489 Benchmarks and leaderboards for sound demixing tasks.pdf → 54 elements, 11 pages
+2026-03-12 19:29:23,925 - INFO - Processing 2/16: 2311.13058 Self-Supervised Music Source Separation Using Vector-Quantized Source Category Estimates.pdf
+2026-03-12 19:29:24,731 - INFO - Bronze: 2311.13058 Self-Supervised Music Source Separation Using Vector-Quantized Source Category Estimates.pdf → 23 elements, 6 pages
+2026-03-12 19:29:24,731 - INFO - Processing 3/16: 2408.01337 MuChoMusic- Evaluating Music Understanding in Multimodal Audio-Language Models.pdf
+2026-03-12 19:29:28,214 - INFO - Bronze: 2408.01337 MuChoMusic- Evaluating Music Understanding in Multimodal Audio-Language Models.pdf → 54 elements, 9 pages
+2026-03-12 19:29:28,214 - INFO - Processing 4/16: 2509.06155 UniVerse-1- Unified Audio-Video Generation via Stitching of Experts.pdf
+2026-03-12 19:29:30,703 - INFO - Bronze: 2509.06155 UniVerse-1- Unified Audio-Video Generation via Stitching of Experts.pdf → 68 elements, 21 pages
+2026-03-12 19:29:30,703 - INFO - Processing 5/16: 2510.01284 Ovi- Twin Backbone Cross-Modal Fusion for Audio-Video Generation.pdf
+2026-03-12 19:29:33,052 - INFO - Bronze: 2510.01284 Ovi- Twin Backbone Cross-Modal Fusion for Audio-Video Generation.pdf → 64 elements, 12 pages
+2026-03-12 19:29:33,052 - INFO - Processing 6/16: 2601.01568 MM-Sonate- Multimodal Controllable Audio-Video Generation with Zero-Shot Voice Cloning.pdf
+2026-03-12 19:29:35,866 - INFO - Bronze: 2601.01568 MM-Sonate- Multimodal Controllable Audio-Video Generation with Zero-Shot Voice Cloning.pdf → 80 elements, 18 pages
+2026-03-12 19:29:35,866 - INFO - Processing 7/16: 2601.11968 MuseAgent-1- Interactive Grounded Multimodal Understanding of Music Scores and Performance Audio.pdf
+2026-03-12 19:29:39,575 - INFO - Bronze: 2601.11968 MuseAgent-1- Interactive Grounded Multimodal Understanding of Music Scores and Performance Audio.pdf → 118 elements, 18 pages
+2026-03-12 19:29:39,575 - INFO - Processing 8/16: 2601.18577 Self-Refining Video Sampling.pdf
+2026-03-12 19:29:47,909 - INFO - Bronze: 2601.18577 Self-Refining Video Sampling.pdf → 131 elements, 29 pages
+2026-03-12 19:29:47,909 - INFO - Processing 9/16: 2601.21740 MIDI-LLaMA- An Instruction-Following Multimodal LLM for Symbolic Music Understanding.pdf
+2026-03-12 19:29:48,892 - INFO - Bronze: 2601.21740 MIDI-LLaMA- An Instruction-Following Multimodal LLM for Symbolic Music Understanding.pdf → 34 elements, 5 pages
+2026-03-12 19:29:48,893 - INFO - Processing 10/16: 2601.22143 JUST-DUB-IT- Video Dubbing via Joint Audio-Visual Diffusion.pdf
+2026-03-12 19:29:52,659 - INFO - Bronze: 2601.22143 JUST-DUB-IT- Video Dubbing via Joint Audio-Visual Diffusion.pdf → 68 elements, 15 pages
+2026-03-12 19:29:52,659 - INFO - Processing 11/16: 2602.00607 MTAVG-Bench- A Comprehensive Benchmark for Evaluating Multi-Talker Dialogue-Centric Audio-Video Generation.pdf
+2026-03-12 19:29:56,838 - INFO - Bronze: 2602.00607 MTAVG-Bench- A Comprehensive Benchmark for Evaluating Multi-Talker Dialogue-Centric Audio-Video Generation.pdf → 118 elements, 20 pages
+2026-03-12 19:29:56,838 - INFO - Processing 12/16: 2602.08682 ALIVE- Animate Your World with Lifelike Audio-Video Generation.pdf
+2026-03-12 19:30:02,219 - INFO - Bronze: 2602.08682 ALIVE- Animate Your World with Lifelike Audio-Video Generation.pdf → 84 elements, 28 pages
+2026-03-12 19:30:02,220 - INFO - Processing 13/16: 2602.17769 MusicSem- A Semantically Rich Language--Audio Dataset of Natural Music Descriptions.pdf
+2026-03-12 19:30:09,540 - INFO - Bronze: 2602.17769 MusicSem- A Semantically Rich Language--Audio Dataset of Natural Music Descriptions.pdf → 166 elements, 51 pages
+2026-03-12 19:30:09,540 - INFO - Processing 14/16: 2602.19163 JavisDiT++- Unified Modeling and Optimization for Joint Audio-Video Generation.pdf
+2026-03-12 19:30:15,327 - INFO - Bronze: 2602.19163 JavisDiT++- Unified Modeling and Optimization for Joint Audio-Video Generation.pdf → 100 elements, 27 pages
+2026-03-12 19:30:15,327 - INFO - Processing 15/16: 2602.21476 A Knowledge-Driven Approach to Music Segmentation, Music Source Separation and Cinematic Audio Source Separation.pdf
+2026-03-12 19:30:17,198 - INFO - Bronze: 2602.21476 A Knowledge-Driven Approach to Music Segmentation, Music Source Separation and Cinematic Audio Source Separation.pdf → 41 elements, 6 pages
+2026-03-12 19:30:17,199 - INFO - Processing 16/16: 2602.23152 The Trinity of Consistency as a Defining Principle for General World Models.pdf
+2026-03-12 19:30:35,190 - INFO - Bronze: 2602.23152 The Trinity of Consistency as a Defining Principle for General World Models.pdf → 323 elements, 119 pages
+2026-03-12 19:30:35,192 - INFO - Silver: 2305_07489_benchmarks_and_leaderboards_for_sound_demixing_tasks_7744aa.json → 11 pages
+2026-03-12 19:30:35,194 - INFO - Gold: enriching page 1/11
+2026-03-12 19:30:41,204 - INFO - Gold: enriching page 2/11
+2026-03-12 19:30:47,754 - INFO - Gold: enriching page 3/11
+2026-03-12 19:30:53,286 - INFO - Gold: enriching page 4/11
+2026-03-12 19:30:59,369 - INFO - Gold: enriching page 5/11
+2026-03-12 19:31:05,472 - INFO - Gold: enriching page 6/11
+2026-03-12 19:31:11,610 - INFO - Gold: enriching page 7/11
+2026-03-12 19:31:17,717 - INFO - Gold: enriching page 8/11
+2026-03-12 19:31:22,985 - INFO - Gold: enriching page 9/11
+2026-03-12 19:31:29,043 - INFO - Gold: enriching page 10/11
+2026-03-12 19:31:34,185 - INFO - Gold: enriching page 11/11
+2026-03-12 19:31:38,431 - INFO - Gold: 2305_07489_benchmarks_and_leaderboards_for_sound_demixing_tasks_7744aa.jsonl → 11 enriched, 0 failed
+2026-03-12 19:31:38,432 - INFO - Silver: 2311_13058_self_supervised_music_source_separation_using_vector_quantized_source_category_estimates_d70e4d.json → 6 pages
+2026-03-12 19:31:38,433 - INFO - Gold: enriching page 1/6
+2026-03-12 19:31:43,530 - INFO - Gold: enriching page 2/6
+2026-03-12 19:31:48,224 - INFO - Gold: enriching page 3/6
+2026-03-12 19:31:54,246 - INFO - Gold: enriching page 4/6
+2026-03-12 19:32:00,380 - INFO - Gold: enriching page 5/6
+2026-03-12 19:32:06,497 - INFO - Gold: enriching page 6/6
+2026-03-12 19:32:12,033 - INFO - Gold: 2311_13058_self_supervised_music_source_separation_using_vector_quantized_source_category_estimates_d70e4d.jsonl → 6 enriched, 0 failed
+2026-03-12 19:32:12,035 - INFO - Silver: 2408_01337_muchomusic_evaluating_music_understanding_in_multimodal_audio_language_models_6ad10c.json → 9 pages
+2026-03-12 19:32:12,037 - INFO - Gold: enriching page 1/9
+2026-03-12 19:32:17,708 - INFO - Gold: enriching page 2/9
+2026-03-12 19:32:23,194 - INFO - Gold: enriching page 3/9
+2026-03-12 19:32:28,623 - INFO - Gold: enriching page 4/9
+2026-03-12 19:32:34,272 - INFO - Gold: enriching page 5/9
+2026-03-12 19:32:39,627 - INFO - Gold: enriching page 6/9
+2026-03-12 19:32:45,599 - INFO - Gold: enriching page 7/9
+2026-03-12 19:32:51,192 - INFO - Gold: enriching page 8/9
+2026-03-12 19:32:56,011 - INFO - Gold: enriching page 9/9
+2026-03-12 19:33:01,256 - INFO - Gold: 2408_01337_muchomusic_evaluating_music_understanding_in_multimodal_audio_language_models_6ad10c.jsonl → 9 enriched, 0 failed
+2026-03-12 19:33:01,257 - INFO - Silver: 2509_06155_universe_1_unified_audio_video_generation_via_stitching_of_experts_6afd1f.json → 21 pages
+2026-03-12 19:33:01,258 - INFO - Gold: enriching page 1/21
+2026-03-12 19:33:06,322 - INFO - Gold: enriching page 2/21
+2026-03-12 19:33:12,035 - INFO - Gold: enriching page 3/21
+2026-03-12 19:33:18,666 - INFO - Gold: enriching page 4/21
+2026-03-12 19:33:24,228 - INFO - Gold: enriching page 5/21
+2026-03-12 19:33:29,879 - INFO - Gold: enriching page 6/21
+2026-03-12 19:33:36,373 - INFO - Gold: enriching page 7/21
+2026-03-12 19:33:41,555 - INFO - Gold: enriching page 8/21
+2026-03-12 19:33:46,655 - INFO - Gold: enriching page 9/21
+2026-03-12 19:33:52,050 - INFO - Gold: enriching page 10/21
+2026-03-12 19:33:57,391 - INFO - Gold: enriching page 11/21
+2026-03-12 19:34:02,691 - INFO - Gold: enriching page 12/21
+2026-03-12 19:34:07,423 - INFO - Gold: enriching page 13/21
+2026-03-12 19:34:13,456 - INFO - Gold: enriching page 14/21
+2026-03-12 19:34:18,739 - INFO - Gold: enriching page 15/21
+2026-03-12 19:34:24,363 - INFO - Gold: enriching page 16/21
+2026-03-12 19:34:29,604 - INFO - Gold: enriching page 17/21
+2026-03-12 19:34:35,120 - INFO - Gold: enriching page 18/21
+2026-03-12 19:34:41,473 - INFO - Gold: enriching page 19/21
+2026-03-12 19:34:46,505 - INFO - Gold: enriching page 20/21
+2026-03-12 19:34:51,449 - INFO - Gold: enriching page 21/21
+2026-03-12 19:34:56,566 - INFO - Gold: 2509_06155_universe_1_unified_audio_video_generation_via_stitching_of_experts_6afd1f.jsonl → 21 enriched, 0 failed
+2026-03-12 19:34:56,567 - INFO - Silver: 2510_01284_ovi_twin_backbone_cross_modal_fusion_for_audio_video_generation_37d638.json → 12 pages
+2026-03-12 19:34:56,568 - INFO - Gold: enriching page 1/12
+2026-03-12 19:35:02,542 - INFO - Gold: enriching page 2/12
+2026-03-12 19:35:08,565 - INFO - Gold: enriching page 3/12
+2026-03-12 19:35:15,663 - INFO - Gold: enriching page 4/12
+2026-03-12 19:35:22,063 - INFO - Gold: enriching page 5/12
+2026-03-12 19:35:27,807 - INFO - Gold: enriching page 6/12
+2026-03-12 19:35:33,784 - INFO - Gold: enriching page 7/12
+2026-03-12 19:35:39,361 - INFO - Gold: enriching page 8/12
+2026-03-12 19:35:45,537 - INFO - Gold: enriching page 9/12
+2026-03-12 19:35:51,494 - INFO - Gold: enriching page 10/12
+2026-03-12 19:35:56,848 - INFO - Gold: enriching page 11/12
+2026-03-12 19:36:01,963 - INFO - Gold: enriching page 12/12
+2026-03-12 19:36:07,079 - INFO - Gold: 2510_01284_ovi_twin_backbone_cross_modal_fusion_for_audio_video_generation_37d638.jsonl → 12 enriched, 0 failed
+2026-03-12 19:36:07,083 - INFO - Silver: 2601_01568_mm_sonate_multimodal_controllable_audio_video_generation_with_zero_shot_voice_cloning_6a670e.json → 18 pages
+2026-03-12 19:36:07,085 - INFO - Gold: enriching page 1/18
+2026-03-12 19:36:12,740 - INFO - Gold: enriching page 2/18
+2026-03-12 19:36:18,571 - INFO - Gold: enriching page 3/18
+2026-03-12 19:36:24,388 - INFO - Gold: enriching page 4/18
+2026-03-12 19:36:30,281 - INFO - Gold: enriching page 5/18
+2026-03-12 19:36:36,545 - INFO - Gold: enriching page 6/18
+2026-03-12 19:36:42,093 - INFO - Gold: enriching page 7/18
+2026-03-12 19:36:47,702 - INFO - Gold: enriching page 8/18
+2026-03-12 19:36:53,489 - INFO - Gold: enriching page 9/18
+2026-03-12 19:36:59,818 - INFO - Gold: enriching page 10/18
+2026-03-12 19:37:05,838 - INFO - Gold: enriching page 11/18
+2026-03-12 19:37:11,895 - INFO - Gold: enriching page 12/18
+2026-03-12 19:37:17,648 - INFO - Gold: enriching page 13/18
+2026-03-12 19:37:23,068 - INFO - Gold: enriching page 14/18
+2026-03-12 19:37:28,157 - INFO - Gold: enriching page 15/18
+2026-03-12 19:37:33,312 - INFO - Gold: enriching page 16/18
+2026-03-12 19:37:39,603 - INFO - Gold: enriching page 17/18
+2026-03-12 19:37:44,567 - INFO - Gold: enriching page 18/18
+2026-03-12 19:37:50,184 - INFO - Gold: 2601_01568_mm_sonate_multimodal_controllable_audio_video_generation_with_zero_shot_voice_cloning_6a670e.jsonl → 18 enriched, 0 failed
+2026-03-12 19:37:50,187 - INFO - Silver: 2601_11968_museagent_1_interactive_grounded_multimodal_understanding_of_music_scores_and_performance_audio_40dd66.json → 18 pages
+2026-03-12 19:37:50,188 - INFO - Gold: enriching page 1/18
+2026-03-12 19:37:55,760 - INFO - Gold: enriching page 2/18
+2026-03-12 19:38:01,476 - INFO - Gold: enriching page 3/18
+2026-03-12 19:38:06,702 - INFO - Gold: enriching page 4/18
+2026-03-12 19:38:13,417 - INFO - Gold: enriching page 5/18
+2026-03-12 19:38:20,079 - INFO - Gold: enriching page 6/18
+2026-03-12 19:38:24,919 - INFO - Gold: enriching page 7/18
+2026-03-12 19:38:30,368 - INFO - Gold: enriching page 8/18
+2026-03-12 19:38:36,342 - INFO - Gold: enriching page 9/18
+2026-03-12 19:38:40,851 - INFO - Gold: enriching page 10/18
+2026-03-12 19:38:46,427 - INFO - Gold: enriching page 11/18
+2026-03-12 19:38:52,799 - INFO - Gold: enriching page 12/18
+2026-03-12 19:38:59,000 - INFO - Gold: enriching page 13/18
+2026-03-12 19:39:05,649 - INFO - Gold: enriching page 14/18
+2026-03-12 19:39:12,182 - INFO - Gold: enriching page 15/18
+2026-03-12 19:39:17,981 - INFO - Gold: enriching page 16/18
+2026-03-12 19:39:23,838 - INFO - Gold: enriching page 17/18
+2026-03-12 19:39:29,070 - INFO - Gold: enriching page 18/18
+2026-03-12 19:39:33,655 - INFO - Gold: 2601_11968_museagent_1_interactive_grounded_multimodal_understanding_of_music_scores_and_performance_audio_40dd66.jsonl → 18 enriched, 0 failed
+2026-03-12 19:39:33,672 - INFO - Silver: 2601_18577_self_refining_video_sampling_132f8f.json → 29 pages
+2026-03-12 19:39:33,673 - INFO - Gold: enriching page 1/29
+2026-03-12 19:39:39,842 - INFO - Gold: enriching page 2/29
+2026-03-12 19:39:46,378 - INFO - Gold: enriching page 3/29
+2026-03-12 19:39:52,915 - INFO - Gold: enriching page 4/29
+2026-03-12 19:39:58,452 - INFO - Gold: enriching page 5/29
+2026-03-12 19:40:04,347 - INFO - Gold: enriching page 6/29
+2026-03-12 19:40:10,655 - INFO - Gold: enriching page 7/29
+2026-03-12 19:40:17,400 - INFO - Gold: enriching page 8/29
+2026-03-12 19:40:23,222 - INFO - Gold: enriching page 9/29
+2026-03-12 19:40:29,152 - INFO - Gold: enriching page 10/29
+2026-03-12 19:40:34,196 - INFO - Gold: enriching page 11/29
+2026-03-12 19:40:38,562 - INFO - Gold: enriching page 12/29
+2026-03-12 19:40:43,579 - INFO - Gold: enriching page 13/29
