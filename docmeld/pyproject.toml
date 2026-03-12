@@ -8,7 +8,7 @@ version = "0.1.0"
 description = "Lightweight PDF to agent-ready knowledge pipeline"
 readme = "README.md"
 requires-python = ">=3.9"
-license = {text = "MIT"}
+license = "MIT"
 authors = [
     {name = "DocMeld Contributors"}
 ]
@@ -16,14 +16,14 @@ keywords = ["pdf", "parsing", "agents", "llm", "document-processing"]
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Developers",
-    "License :: OSI Approved :: MIT License",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
+    "Topic :: Text Processing :: General",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
 ]
-
 dependencies = [
     "PyMuPDF>=1.23.0",
     "pymupdf4llm>=0.0.10",
@@ -43,6 +43,11 @@ dev = [
     "black>=23.0.0",
     "mypy>=1.5.0",
 ]
+
+[project.urls]
+Homepage = "https://github.com/docmeld/docmeld"
+Repository = "https://github.com/docmeld/docmeld"
+Issues = "https://github.com/docmeld/docmeld/issues"
 
 [project.scripts]
 docmeld = "docmeld.cli:main"

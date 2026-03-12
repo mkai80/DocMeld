@@ -9,25 +9,18 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Dict, List
 
+from docmeld.bronze.filename_sanitizer import calculate_hash
+
 logger = logging.getLogger("docmeld")
 
 
-def _find_source_pdf(output_dir: Path) -> str | None:
-    """Read the silver JSONL in output_dir to find the original PDF filename."""
-    for jsonl_file in output_dir.glob("*.jsonl"):
-        if jsonl_file.name.endswith("_gold.jsonl"):
-            continue
-        try:
-            with open(jsonl_file, encoding="utf-8") as f:
-                first_line = f.readline().strip()
-                if first_line:
-                    data = json.loads(first_line)
-                    source = data.get("metadata", {}).get("source", "")
-                    if source:
-                        return source
-        except Exception:
-            continue
-    return None
+def _build_pdf_hash_map(folder: Path) -> Dict[str, Path]:
+    """Build a mapping from MD5 hash suffix to original PDF path."""
+    result: Dict[str, Path] = {}
+    for pdf in sorted(folder.glob("*.pdf")) + sorted(folder.glob("*.PDF")):
+        hash6 = calculate_hash(str(pdf))
+        result[hash6] = pdf
+    return result
 
 
 def reorganize_by_category(folder_path: str) -> None:
@@ -35,6 +28,7 @@ def reorganize_by_category(folder_path: str) -> None:
 
     Reads categories.json from the folder, creates subdirectories for each
     category, and moves both the output directory and the original PDF into them.
+    Matches PDFs to output dirs via the MD5 hash suffix in the dir name.
 
     Args:
         folder_path: Path to the folder containing categories.json.
@@ -50,6 +44,9 @@ def reorganize_by_category(folder_path: str) -> None:
 
     with open(index_path, encoding="utf-8") as f:
         index = json.load(f)
+
+    # Build hash → PDF mapping for matching originals
+    pdf_hash_map = _build_pdf_hash_map(folder)
 
     moves: List[Dict[str, str]] = []
 
@@ -78,16 +75,15 @@ def reorganize_by_category(folder_path: str) -> None:
         # Move output directory (bronze folder)
         dest = cat_dir / stem
         if not dest.exists():
-            # Find and move the original PDF first
-            source_pdf_name = _find_source_pdf(output_dir)
-            if source_pdf_name:
-                pdf_path = folder / source_pdf_name
-                if pdf_path.exists():
-                    pdf_dest = cat_dir / source_pdf_name
-                    if not pdf_dest.exists():
-                        shutil.move(str(pdf_path), str(pdf_dest))
-                        moves.append({"source": str(pdf_path), "dest": str(pdf_dest), "type": "pdf"})
-                        logger.info(f"Moved {source_pdf_name} → {safe_category}/")
+            # Find and move the original PDF by matching the hash suffix
+            hash6 = stem.rsplit("_", 1)[-1] if "_" in stem else ""
+            pdf_path = pdf_hash_map.get(hash6)
+            if pdf_path and pdf_path.exists():
+                pdf_dest = cat_dir / pdf_path.name
+                if not pdf_dest.exists():
+                    shutil.move(str(pdf_path), str(pdf_dest))
+                    moves.append({"source": str(pdf_path), "dest": str(pdf_dest), "type": "pdf"})
+                    logger.info(f"Moved {pdf_path.name} → {safe_category}/")
 
             shutil.move(str(output_dir), str(dest))
             moves.append({"source": str(output_dir), "dest": str(dest), "type": "output_dir"})
