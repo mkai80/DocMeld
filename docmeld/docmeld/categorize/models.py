@@ -7,15 +7,15 @@ from pydantic import BaseModel, Field
 
 
 class PaperMetadata(BaseModel):
-    """Aggregated metadata for a single paper from its gold JSONL output."""
+    """Aggregated metadata for a single paper from its silver JSONL output."""
 
     filename: str
     file_path: str
     output_dir: str
-    description: str
+    content: str = ""
+    description: str = ""
     keywords: List[str] = Field(default_factory=list)
     page_count: int = 0
-    gold_path: str = ""
 
 
 class Category(BaseModel):

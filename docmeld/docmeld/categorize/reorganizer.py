@@ -12,11 +12,29 @@ from typing import Dict, List
 logger = logging.getLogger("docmeld")
 
 
+def _find_source_pdf(output_dir: Path) -> str | None:
+    """Read the silver JSONL in output_dir to find the original PDF filename."""
+    for jsonl_file in output_dir.glob("*.jsonl"):
+        if jsonl_file.name.endswith("_gold.jsonl"):
+            continue
+        try:
+            with open(jsonl_file, encoding="utf-8") as f:
+                first_line = f.readline().strip()
+                if first_line:
+                    data = json.loads(first_line)
+                    source = data.get("metadata", {}).get("source", "")
+                    if source:
+                        return source
+        except Exception:
+            continue
+    return None
+
+
 def reorganize_by_category(folder_path: str) -> None:
-    """Move PDFs and output folders into category-named subdirectories.
+    """Move PDFs and their output folders into category-named subdirectories.
 
     Reads categories.json from the folder, creates subdirectories for each
-    category, and moves the output directories into them.
+    category, and moves both the output directory and the original PDF into them.
 
     Args:
         folder_path: Path to the folder containing categories.json.
@@ -40,9 +58,9 @@ def reorganize_by_category(folder_path: str) -> None:
         category = paper_entry["category"]
         safe_category = _sanitize_category_name(category)
 
-        # The gold filename is like paper1_abc123_gold.jsonl
-        # The output dir is paper1_abc123 (strip _gold.jsonl)
-        stem = filename.replace("_gold.jsonl", "")
+        # The filename is like paper1_abc123.jsonl (silver) or paper1_abc123_gold.jsonl (legacy)
+        # The output dir is paper1_abc123
+        stem = filename.replace("_gold.jsonl", "").replace(".jsonl", "")
         output_dir = folder / stem
 
         if not output_dir.exists():
@@ -57,9 +75,20 @@ def reorganize_by_category(folder_path: str) -> None:
         cat_dir = folder / safe_category
         cat_dir.mkdir(exist_ok=True)
 
-        # Move output directory
+        # Move output directory (bronze folder)
         dest = cat_dir / stem
         if not dest.exists():
+            # Find and move the original PDF first
+            source_pdf_name = _find_source_pdf(output_dir)
+            if source_pdf_name:
+                pdf_path = folder / source_pdf_name
+                if pdf_path.exists():
+                    pdf_dest = cat_dir / source_pdf_name
+                    if not pdf_dest.exists():
+                        shutil.move(str(pdf_path), str(pdf_dest))
+                        moves.append({"source": str(pdf_path), "dest": str(pdf_dest), "type": "pdf"})
+                        logger.info(f"Moved {source_pdf_name} → {safe_category}/")
+
             shutil.move(str(output_dir), str(dest))
             moves.append({"source": str(output_dir), "dest": str(dest), "type": "output_dir"})
             logger.info(f"Moved {output_dir.name} → {safe_category}/")

@@ -104,11 +104,11 @@ class DocMeldParser:
             )
 
     def process_categorize(self, reorganize: bool = False) -> CategorizeResult:
-        """Run full pipeline + categorization on a folder of PDFs.
+        """Run bronze→silver + categorization on a folder of PDFs.
 
-        Processes all PDFs through bronze→silver→gold, aggregates gold
-        metadata, clusters papers into categories via DeepSeek, and
-        writes categories.json. Optionally reorganizes files.
+        Skips the gold stage entirely. Instead, reads silver JSONL content
+        directly (first 30k chars per paper) and sends it to DeepSeek
+        for categorization in a single API call.
 
         Args:
             reorganize: If True, move files into category subdirectories.
@@ -134,16 +134,27 @@ class DocMeldParser:
                 reorganized=False,
             )
 
-        # Step 1: Run full pipeline (bronze → silver → gold)
-        logger.info(f"Processing {len(pdf_files)} PDFs through full pipeline...")
-        self.process_all()
+        # Step 1: Run bronze → silver only (skip gold)
+        bronze_processor = BronzeProcessor()
+        silver_processor = SilverProcessor()
 
-        # Step 2: Aggregate gold metadata
+        logger.info(f"Processing {len(pdf_files)} PDFs through bronze → silver...")
+        bronze_result = bronze_processor.process_folder(self.path, backend=self.backend)
+
+        for subdir in sorted(folder.iterdir()):
+            json_files = list(subdir.glob("*.json")) if subdir.is_dir() else []
+            for json_file in json_files:
+                try:
+                    silver_processor.process(str(json_file))
+                except Exception as e:
+                    logger.warning(f"Silver stage failed for {json_file.name}: {e}")
+
+        # Step 2: Aggregate silver content
         from docmeld.categorize.aggregator import aggregate_paper_metadata
 
         papers = aggregate_paper_metadata(self.path)
         if not papers:
-            logger.warning("No gold metadata found to categorize")
+            logger.warning("No silver content found to categorize")
             return CategorizeResult(
                 index_path="",
                 total_papers=0,
@@ -152,7 +163,7 @@ class DocMeldParser:
                 reorganized=False,
             )
 
-        # Step 3: Categorize via DeepSeek
+        # Step 3: Categorize via DeepSeek (single API call)
         from docmeld.categorize.categorizer import categorize_papers
         from docmeld.gold.deepseek_client import DeepSeekClient
         from docmeld.utils.env_loader import load_env
@@ -163,7 +174,14 @@ class DocMeldParser:
             endpoint=env.get("DEEPSEEK_API_ENDPOINT"),
         )
 
-        categories = categorize_papers(papers, client)
+        categories, paper_descs = categorize_papers(papers, client)
+
+        # Enrich papers with descriptions/keywords from the API response
+        desc_map = {d["filename"]: d for d in paper_descs}
+        for p in papers:
+            info = desc_map.get(p.filename, {})
+            p.description = info.get("description", "")
+            p.keywords = info.get("keywords", [])
 
         # Step 4: Write categories.json
         from docmeld.categorize.index_writer import write_category_index

@@ -12,70 +12,68 @@ logger = logging.getLogger("docmeld")
 
 def categorize_papers(
     papers: List[PaperMetadata], client: Any
-) -> List[Dict[str, Any]]:
-    """Send aggregated paper metadata to DeepSeek for topic clustering.
+) -> tuple[List[Dict[str, Any]], List[Dict[str, Any]]]:
+    """Send aggregated paper content to DeepSeek for topic clustering.
 
     Args:
         papers: List of PaperMetadata from the aggregator.
         client: DeepSeekClient instance with categorize_papers() method.
 
     Returns:
-        List of category dicts: [{"name": str, "papers": [str], "keywords": [str]}]
+        Tuple of (categories, paper_descriptions).
     """
     if not papers:
-        return []
+        return [], []
 
     prompt = _build_categorization_prompt(papers)
     logger.info(f"Categorizing {len(papers)} papers via API...")
 
     response_text = client.categorize_papers(prompt)
-    categories = _parse_categorization_response(response_text)
+    categories, paper_descs = _parse_categorization_response(response_text)
 
     logger.info(f"Identified {len(categories)} categories")
-    return categories
+    return categories, paper_descs
 
 
 def _build_categorization_prompt(papers: List[PaperMetadata]) -> str:
-    """Build the JSON prompt for categorization, sorted by filename for determinism."""
+    """Build the prompt for categorization using truncated paper content."""
     sorted_papers = sorted(papers, key=lambda p: p.filename)
 
-    paper_data = []
+    paper_sections = []
     for p in sorted_papers:
-        paper_data.append({
-            "filename": p.filename,
-            "description": p.description,
-            "keywords": p.keywords,
-        })
+        # Truncate content to keep total prompt manageable
+        content_preview = p.content[:3000] if p.content else "(no content)"
+        paper_sections.append(
+            f"=== Paper: {p.filename} ===\n{content_preview}\n"
+        )
 
-    prompt_json = json.dumps(paper_data, ensure_ascii=False, indent=2)
+    papers_text = "\n".join(paper_sections)
 
     return (
         "You are a research paper categorization assistant. "
-        "Given the following list of research papers with their descriptions and keywords, "
+        "Given the following research papers with their content excerpts, "
         "group them into topic categories.\n\n"
         "Rules:\n"
         "- Each paper must be assigned to exactly one category\n"
         "- Determine the number of categories automatically based on content similarity\n"
         "- Category names should be concise and descriptive (e.g., 'Natural Language Processing', 'Computer Vision')\n"
         "- If all papers are on similar topics, use a single category\n"
-        "- Include representative keywords for each category\n\n"
+        "- Include representative keywords for each category\n"
+        "- Also return a one-line description for each paper\n\n"
         "Return ONLY valid JSON with this exact structure:\n"
-        '{"categories": [{"name": "Category Name", "papers": ["filename1.jsonl", "filename2.jsonl"], "keywords": ["kw1", "kw2"]}]}\n\n'
-        f"Papers:\n{prompt_json}"
+        '{"categories": [{"name": "Category Name", "papers": ["filename1.jsonl", "filename2.jsonl"], "keywords": ["kw1", "kw2"]}], '
+        '"paper_descriptions": [{"filename": "filename1.jsonl", "description": "one-line summary", "keywords": ["kw1", "kw2"]}]}\n\n'
+        f"Papers:\n{papers_text}"
     )
 
 
-def _parse_categorization_response(response_text: str) -> List[Dict[str, Any]]:
-    """Parse the API response into category assignments.
-
-    Args:
-        response_text: Raw text from the API.
+def _parse_categorization_response(
+    response_text: str,
+) -> tuple[List[Dict[str, Any]], List[Dict[str, Any]]]:
+    """Parse the API response into category assignments and paper descriptions.
 
     Returns:
-        List of category dicts.
-
-    Raises:
-        ValueError: If the response cannot be parsed.
+        Tuple of (categories, paper_descriptions).
     """
     text = response_text.strip()
 
@@ -93,4 +91,6 @@ def _parse_categorization_response(response_text: str) -> List[Dict[str, Any]]:
     if "categories" not in data:
         raise ValueError("Missing 'categories' key in categorization response")
 
-    return data["categories"]
+    categories = data["categories"]
+    paper_descs = data.get("paper_descriptions", [])
+    return categories, paper_descs

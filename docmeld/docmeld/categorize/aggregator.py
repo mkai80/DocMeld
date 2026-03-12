@@ -1,4 +1,4 @@
-"""Aggregate gold-stage metadata across all papers in a folder."""
+"""Aggregate silver-stage content across all papers in a folder."""
 from __future__ import annotations
 
 import json
@@ -10,13 +10,15 @@ from docmeld.categorize.models import PaperMetadata
 
 logger = logging.getLogger("docmeld")
 
+# Max chars of page_content to collect per paper (~8k tokens)
+MAX_CONTENT_CHARS = 30000
+
 
 def aggregate_paper_metadata(folder_path: str) -> List[PaperMetadata]:
-    """Scan a folder for gold JSONL files and collect per-paper metadata.
+    """Scan a folder for silver JSONL files and collect per-paper content.
 
-    Looks for *_gold.jsonl files in subdirectories of the given folder.
-    For each file, aggregates descriptions and deduplicates keywords
-    across all pages.
+    Looks for *.jsonl files (excluding *_gold.jsonl) in subdirectories.
+    Concatenates page_content from each page up to MAX_CONTENT_CHARS.
 
     Args:
         folder_path: Path to the folder containing paper output directories.
@@ -27,24 +29,27 @@ def aggregate_paper_metadata(folder_path: str) -> List[PaperMetadata]:
     folder = Path(folder_path)
     results: List[PaperMetadata] = []
 
-    gold_files = sorted(folder.rglob("*_gold.jsonl"))
+    silver_files = sorted(
+        p for p in folder.rglob("*.jsonl")
+        if not p.name.endswith("_gold.jsonl")
+    )
 
-    for gold_path in gold_files:
+    for silver_path in silver_files:
         try:
-            metadata = _parse_gold_file(gold_path)
+            metadata = _parse_silver_file(silver_path)
             if metadata:
                 results.append(metadata)
         except Exception as e:
-            logger.warning(f"Failed to parse {gold_path}: {e}")
+            logger.warning(f"Failed to parse {silver_path}: {e}")
 
     results.sort(key=lambda p: p.filename)
     return results
 
 
-def _parse_gold_file(gold_path: Path) -> PaperMetadata | None:
-    """Parse a single gold JSONL file into PaperMetadata."""
+def _parse_silver_file(silver_path: Path) -> PaperMetadata | None:
+    """Parse a silver JSONL file into PaperMetadata with truncated content."""
     pages: List[Dict[str, Any]] = []
-    with open(gold_path, encoding="utf-8") as f:
+    with open(silver_path, encoding="utf-8") as f:
         for line in f:
             line = line.strip()
             if line:
@@ -53,36 +58,29 @@ def _parse_gold_file(gold_path: Path) -> PaperMetadata | None:
     if not pages:
         return None
 
-    all_keywords: List[str] = []
-    descriptions: List[str] = []
-
+    # Concatenate page_content up to the char limit
+    content_parts: List[str] = []
+    total_chars = 0
     for page in pages:
-        meta = page.get("metadata", {})
-        desc = meta.get("description", "")
-        kws = meta.get("keywords", [])
+        page_content = page.get("page_content", "")
+        if not page_content:
+            continue
+        remaining = MAX_CONTENT_CHARS - total_chars
+        if remaining <= 0:
+            break
+        if len(page_content) > remaining:
+            content_parts.append(page_content[:remaining])
+            total_chars += remaining
+            break
+        content_parts.append(page_content)
+        total_chars += len(page_content)
 
-        if desc:
-            descriptions.append(desc)
-        all_keywords.extend(kws)
-
-    # Deduplicate keywords preserving order
-    seen = set()
-    unique_keywords: List[str] = []
-    for kw in all_keywords:
-        kw_lower = kw.lower()
-        if kw_lower not in seen:
-            seen.add(kw_lower)
-            unique_keywords.append(kw)
-
-    # Combine descriptions into a single summary
-    combined_desc = " ".join(descriptions[:5])  # First 5 page descriptions
+    combined_content = "\n\n---\n\n".join(content_parts)
 
     return PaperMetadata(
-        filename=gold_path.name,
-        file_path=str(gold_path.parent.parent / gold_path.name),
-        output_dir=str(gold_path.parent),
-        description=combined_desc,
-        keywords=unique_keywords,
+        filename=silver_path.name,
+        file_path=str(silver_path),
+        output_dir=str(silver_path.parent),
+        content=combined_content,
         page_count=len(pages),
-        gold_path=str(gold_path),
     )
