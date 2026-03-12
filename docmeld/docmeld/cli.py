@@ -1,0 +1,90 @@
+"""DocMeld CLI interface."""
+from __future__ import annotations
+
+import argparse
+import sys
+from pathlib import Path
+
+
+def main(args: list[str] | None = None) -> int:
+    """CLI entry point for DocMeld."""
+    parser = argparse.ArgumentParser(
+        prog="docmeld",
+        description="Lightweight PDF to agent-ready knowledge pipeline",
+    )
+    subparsers = parser.add_subparsers(dest="command", help="Pipeline stage to run")
+
+    # process (all stages)
+    p_all = subparsers.add_parser("process", help="Run full pipeline (bronze → silver → gold)")
+    p_all.add_argument("path", help="Path to PDF file or folder of PDFs")
+
+    # bronze
+    p_bronze = subparsers.add_parser("bronze", help="Run bronze stage only (PDF → JSON)")
+    p_bronze.add_argument("path", help="Path to PDF file or folder of PDFs")
+
+    # silver
+    p_silver = subparsers.add_parser("silver", help="Run silver stage only (JSON → JSONL)")
+    p_silver.add_argument("path", help="Path to bronze JSON file")
+
+    # gold
+    p_gold = subparsers.add_parser("gold", help="Run gold stage only (JSONL → enriched JSONL)")
+    p_gold.add_argument("path", help="Path to silver JSONL file")
+
+    parsed = parser.parse_args(args)
+
+    if not parsed.command:
+        parser.print_help()
+        return 1
+
+    path = parsed.path
+    if not Path(path).exists():
+        print(f"Error: path not found: {path}", file=sys.stderr)
+        return 1
+
+    from docmeld.parser import DocMeldParser
+    from docmeld.utils.logging import setup_logging
+
+    logger = setup_logging()
+
+    try:
+        if parsed.command == "process":
+            doc = DocMeldParser(path)
+            result = doc.process_all()
+            print(f"Done: {result.successful}/{result.total_files} files processed")
+            if result.failed > 0:
+                print(f"Failed: {result.failed} files")
+                for f in result.failures:
+                    print(f"  - {f.filename}: {f.error}")
+            print(f"Time: {result.processing_time_seconds}s")
+
+        elif parsed.command == "bronze":
+            doc = DocMeldParser(path)
+            result = doc.process_bronze()
+            if hasattr(result, "element_count"):
+                print(f"Bronze: {result.element_count} elements, {result.page_count} pages")
+                print(f"Output: {result.output_path}")
+            else:
+                print(f"Bronze batch: {result.successful}/{result.total_files} files")
+
+        elif parsed.command == "silver":
+            doc = DocMeldParser(path)
+            result = doc.process_silver(path)
+            print(f"Silver: {result.page_count} pages")
+            print(f"Output: {result.output_path}")
+
+        elif parsed.command == "gold":
+            doc = DocMeldParser(path)
+            result = doc.process_gold(path)
+            print(f"Gold: {result.pages_enriched} enriched, {result.pages_failed} failed")
+            print(f"Output: {result.output_path}")
+
+    except Exception as e:
+        logger.error(f"Pipeline error: {e}")
+        print(f"Error: {e}", file=sys.stderr)
+        return 1
+
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

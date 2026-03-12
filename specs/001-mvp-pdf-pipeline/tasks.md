@@ -24,14 +24,14 @@
 
 **Purpose**: Project initialization, packaging, and dev tooling
 
-- [ ] T001 Create project directory structure per plan.md: `docmeld/docmeld/`, `docmeld/tests/`, `docmeld/examples/`, `docmeld/docs/`
-- [ ] T002 Initialize Python project with `pyproject.toml` (PEP 621): name=docmeld, version=0.1.0, python>=3.9, dependencies=[PyMuPDF, pymupdf4llm, pandas, openpyxl, pydantic, python-dotenv, langchain-deepseek], dev-dependencies=[pytest, pytest-cov, ruff, black, mypy]
-- [ ] T003 Create virtual environment and install: `python3 -m venv venv && source venv/bin/activate && pip install -e ".[dev]"`
-- [ ] T004 [P] Configure ruff, black (line-length=100), and mypy (strict mode) in `pyproject.toml`
-- [ ] T005 [P] Create `.gitignore` with Python defaults, venv/, .env.local, *.pyc, __pycache__/, dist/, *.egg-info/
-- [ ] T006 [P] Create `.env.local.example` with `DEEPSEEK_API_KEY=your_key_here` and `DEEPSEEK_API_ENDPOINT=https://api.deepseek.com` placeholders
-- [ ] T007 [P] Create `LICENSE` file with MIT license text
-- [ ] T008 Create `docmeld/docmeld/__init__.py` with public API exports: `from docmeld.parser import DocMeldParser` and `__version__ = "0.1.0"`
+- [x] T001 Create project directory structure per plan.md: `docmeld/docmeld/`, `docmeld/tests/`, `docmeld/examples/`, `docmeld/docs/`
+- [x] T002 Initialize Python project with `pyproject.toml` (PEP 621): name=docmeld, version=0.1.0, python>=3.9, dependencies=[PyMuPDF, pymupdf4llm, pandas, openpyxl, pydantic, python-dotenv, langchain-deepseek], dev-dependencies=[pytest, pytest-cov, ruff, black, mypy]
+- [x] T003 Create virtual environment and install: `python3 -m venv venv && source venv/bin/activate && pip install -e ".[dev]"`
+- [x] T004 [P] Configure ruff, black (line-length=100), and mypy (strict mode) in `pyproject.toml`
+- [x] T005 [P] Create `.gitignore` with Python defaults, venv/, .env.local, *.pyc, __pycache__/, dist/, *.egg-info/
+- [x] T006 [P] Create `.env.local.example` with `DEEPSEEK_API_KEY=your_key_here` and `DEEPSEEK_API_ENDPOINT=https://api.deepseek.com` placeholders
+- [x] T007 [P] Create `LICENSE` file with MIT license text
+- [x] T008 Create `docmeld/docmeld/__init__.py` with public API exports: `from docmeld.parser import DocMeldParser` and `__version__ = "0.1.0"`
 
 ---
 
@@ -45,23 +45,23 @@
 
 > **NOTE: Write these tests FIRST, ensure they FAIL before implementation**
 
-- [ ] T009 [P] Write unit tests for Pydantic element models (TitleElement, TextElement, TableElement, ImageElement) in `tests/unit/test_element_types.py`: test field validation, type discriminator, page_no >= 1, title level 0-5, content non-empty
-- [ ] T010 [P] Write unit tests for logging utility in `tests/unit/test_logging.py`: test timestamped filename format `docmeld_YYYYMMDD_HHMMSS.log`, test log file creation in cwd, test log levels (ERROR, WARNING, INFO, DEBUG)
-- [ ] T011 [P] Write unit tests for env loader in `tests/unit/test_env_loader.py`: test loading DEEPSEEK_API_KEY from .env.local, test missing key raises error, test optional DEEPSEEK_API_ENDPOINT
-- [ ] T012 [P] Write unit tests for progress utility in `tests/unit/test_progress.py`: test progress message format "Processing 3/10 files...", test stage progress "Bronze stage: 5/10 pages"
-- [ ] T013 [P] Write contract test for element JSON Schema validation in `tests/contract/test_element_schema.py`: validate sample bronze JSON against `specs/001-mvp-pdf-pipeline/contracts/element-schema.json`
+- [x] T009 [P] Write unit tests for Pydantic element models (TitleElement, TextElement, TableElement, ImageElement) in `tests/unit/test_element_types.py`: test field validation, type discriminator, page_no >= 1, title level 0-5, content non-empty
+- [x] T010 [P] Write unit tests for logging utility in `tests/unit/test_logging.py`: test timestamped filename format `docmeld_YYYYMMDD_HHMMSS.log`, test log file creation in cwd, test log levels (ERROR, WARNING, INFO, DEBUG)
+- [x] T011 [P] Write unit tests for env loader in `tests/unit/test_env_loader.py`: test loading DEEPSEEK_API_KEY from .env.local, test missing key raises error, test optional DEEPSEEK_API_ENDPOINT
+- [x] T012 [P] Write unit tests for progress utility in `tests/unit/test_progress.py`: test progress message format "Processing 3/10 files...", test stage progress "Bronze stage: 5/10 pages"
+- [x] T013 [P] Write contract test for element JSON Schema validation in `tests/contract/test_element_schema.py`: validate sample bronze JSON against `specs/001-mvp-pdf-pipeline/contracts/element-schema.json`
 
 ### Implementation for Foundational
 
-- [ ] T014 [P] Implement Pydantic element models in `docmeld/docmeld/bronze/element_types.py`: BronzeElement base, TitleElement, TextElement, TableElement, ImageElement per data-model.md
-- [ ] T015 [P] Implement SilverPage and GoldPage Pydantic models in `docmeld/docmeld/silver/page_models.py`: SilverMetadata, SilverPage, GoldMetadata, GoldPage, ProcessingResult per data-model.md
-- [ ] T016 [P] Implement timestamped logging utility in `docmeld/docmeld/utils/logging.py`: setup_logging() returns logger, creates `docmeld_YYYYMMDD_HHMMSS.log` in cwd, configures file + console handlers
-- [ ] T017 [P] Implement env loader in `docmeld/docmeld/utils/env_loader.py`: load_env() loads `.env.local` from repo root using python-dotenv, validates DEEPSEEK_API_KEY presence
-- [ ] T018 [P] Implement progress indicator utility in `docmeld/docmeld/utils/progress.py`: ProgressTracker class with update(current, total, message) method, prints to stderr
-- [ ] T019 Create `tests/conftest.py` with shared pytest fixtures: tmp_dir, sample PDF paths, mock .env.local
-- [ ] T020 [P] Create test fixture `tests/fixtures/sample_simple.pdf`: programmatically generate a 3-page PDF with text, one title, and one table using PyMuPDF
-- [ ] T021 [P] Create test fixture `tests/fixtures/sample_complex.pdf`: programmatically generate a 5-page PDF with multi-level titles, multiple tables, images, and mixed content
-- [ ] T022 Run `pytest tests/unit/test_element_types.py tests/unit/test_logging.py tests/unit/test_env_loader.py tests/unit/test_progress.py tests/contract/test_element_schema.py` — all tests MUST pass
+- [x] T014 [P] Implement Pydantic element models in `docmeld/docmeld/bronze/element_types.py`: BronzeElement base, TitleElement, TextElement, TableElement, ImageElement per data-model.md
+- [x] T015 [P] Implement SilverPage and GoldPage Pydantic models in `docmeld/docmeld/silver/page_models.py`: SilverMetadata, SilverPage, GoldMetadata, GoldPage, ProcessingResult per data-model.md
+- [x] T016 [P] Implement timestamped logging utility in `docmeld/docmeld/utils/logging.py`: setup_logging() returns logger, creates `docmeld_YYYYMMDD_HHMMSS.log` in cwd, configures file + console handlers
+- [x] T017 [P] Implement env loader in `docmeld/docmeld/utils/env_loader.py`: load_env() loads `.env.local` from repo root using python-dotenv, validates DEEPSEEK_API_KEY presence
+- [x] T018 [P] Implement progress indicator utility in `docmeld/docmeld/utils/progress.py`: ProgressTracker class with update(current, total, message) method, prints to stderr
+- [x] T019 Create `tests/conftest.py` with shared pytest fixtures: tmp_dir, sample PDF paths, mock .env.local
+- [x] T020 [P] Create test fixture `tests/fixtures/sample_simple.pdf`: programmatically generate a 3-page PDF with text, one title, and one table using PyMuPDF
+- [x] T021 [P] Create test fixture `tests/fixtures/sample_complex.pdf`: programmatically generate a 5-page PDF with multi-level titles, multiple tables, images, and mixed content
+- [x] T022 Run `pytest tests/unit/test_element_types.py tests/unit/test_logging.py tests/unit/test_env_loader.py tests/unit/test_progress.py tests/contract/test_element_schema.py` — all tests MUST pass
 
 **Checkpoint**: Foundation ready — element models validated, logging/env/progress utilities working, test fixtures created. User story implementation can now begin.
 
@@ -77,17 +77,17 @@
 
 > **NOTE: Write these tests FIRST, ensure they FAIL before implementation**
 
-- [ ] T023 [P] [US1] Write unit tests for filename sanitizer in `tests/unit/test_filename_sanitizer.py`: test dangerous char replacement (`/\:*?"<>|` → `_`), test unicode normalization, test truncation at 200 chars, test MD5 hash calculation (last 6 digits), test full sanitized name format `{stem}_{hash6}`, test collision resistance (different files same name)
-- [ ] T024 [P] [US1] Write unit tests for element extractor in `tests/unit/test_element_extractor.py`: test title detection from `#` lines (level counting), test table detection from `|` lines (buffer flush), test text extraction (non-title non-table), test image file discovery and base64 encoding, test element ordering preservation, test empty page handling, test table summary generation (first column items)
-- [ ] T025 [P] [US1] Write integration test for bronze pipeline in `tests/integration/test_bronze_pipeline.py`: test single PDF end-to-end with sample_simple.pdf (verify folder creation, JSON output, element types), test with sample_complex.pdf (verify tables, titles, images), test idempotency (re-run skips existing), test malformed PDF handling (graceful error), test special character filename sanitization
+- [x] T023 [P] [US1] Write unit tests for filename sanitizer in `tests/unit/test_filename_sanitizer.py`: test dangerous char replacement (`/\:*?"<>|` → `_`), test unicode normalization, test truncation at 200 chars, test MD5 hash calculation (last 6 digits), test full sanitized name format `{stem}_{hash6}`, test collision resistance (different files same name)
+- [x] T024 [P] [US1] Write unit tests for element extractor in `tests/unit/test_element_extractor.py`: test title detection from `#` lines (level counting), test table detection from `|` lines (buffer flush), test text extraction (non-title non-table), test image file discovery and base64 encoding, test element ordering preservation, test empty page handling, test table summary generation (first column items)
+- [x] T025 [P] [US1] Write integration test for bronze pipeline in `tests/integration/test_bronze_pipeline.py`: test single PDF end-to-end with sample_simple.pdf (verify folder creation, JSON output, element types), test with sample_complex.pdf (verify tables, titles, images), test idempotency (re-run skips existing), test malformed PDF handling (graceful error), test special character filename sanitization
 
 ### Implementation for User Story 1
 
-- [ ] T026 [US1] Implement filename sanitizer in `docmeld/docmeld/bronze/filename_sanitizer.py`: sanitize_filename(path) → replaces dangerous chars with `_`, normalizes unicode NFC, lowercases, truncates to 200 chars; calculate_hash(path) → MD5 of file bytes, returns last 6 hex digits; get_output_name(path) → returns `{sanitized_stem}_{hash6}`
-- [ ] T027 [US1] Implement element extractor in `docmeld/docmeld/bronze/element_extractor.py`: extract_elements(pdf_path, output_dir) → opens PDF with fitz, iterates pages, calls pymupdf4llm.to_markdown() per page, parses markdown line-by-line (# → title, | → table buffer, else → text buffer, empty → flush), discovers images via glob `page{N:03d}_*.png`, base64 encodes, returns List[dict] in reading order. Include table summary generation: parse first column values, format as "Items: x, y, z (+N more)"
-- [ ] T028 [US1] Implement bronze processor orchestrator in `docmeld/docmeld/bronze/processor.py`: BronzeProcessor class with process_file(pdf_path) → sanitizes filename, calculates hash, creates output folder, checks idempotency (skip if JSON exists), calls element_extractor, saves JSON to `{output_dir}/{name_hash6}.json`, returns BronzeResult with output_path and element count
-- [ ] T029 [US1] Create `docmeld/docmeld/bronze/__init__.py` with exports: BronzeProcessor, sanitize_filename, extract_elements
-- [ ] T030 [US1] Run `pytest tests/unit/test_filename_sanitizer.py tests/unit/test_element_extractor.py tests/integration/test_bronze_pipeline.py -v` — all tests MUST pass
+- [x] T026 [US1] Implement filename sanitizer in `docmeld/docmeld/bronze/filename_sanitizer.py`: sanitize_filename(path) → replaces dangerous chars with `_`, normalizes unicode NFC, lowercases, truncates to 200 chars; calculate_hash(path) → MD5 of file bytes, returns last 6 hex digits; get_output_name(path) → returns `{sanitized_stem}_{hash6}`
+- [x] T027 [US1] Implement element extractor in `docmeld/docmeld/bronze/element_extractor.py`: extract_elements(pdf_path, output_dir) → opens PDF with fitz, iterates pages, calls pymupdf4llm.to_markdown() per page, parses markdown line-by-line (# → title, | → table buffer, else → text buffer, empty → flush), discovers images via glob `page{N:03d}_*.png`, base64 encodes, returns List[dict] in reading order. Include table summary generation: parse first column values, format as "Items: x, y, z (+N more)"
+- [x] T028 [US1] Implement bronze processor orchestrator in `docmeld/docmeld/bronze/processor.py`: BronzeProcessor class with process_file(pdf_path) → sanitizes filename, calculates hash, creates output folder, checks idempotency (skip if JSON exists), calls element_extractor, saves JSON to `{output_dir}/{name_hash6}.json`, returns BronzeResult with output_path and element count
+- [x] T029 [US1] Create `docmeld/docmeld/bronze/__init__.py` with exports: BronzeProcessor, sanitize_filename, extract_elements
+- [x] T030 [US1] Run `pytest tests/unit/test_filename_sanitizer.py tests/unit/test_element_extractor.py tests/integration/test_bronze_pipeline.py -v` — all tests MUST pass
 
 **Checkpoint**: Single PDF → Bronze JSON works end-to-end. Can process any digital-native PDF into structured element JSON.
 
@@ -103,14 +103,14 @@
 
 > **NOTE: Write these tests FIRST, ensure they FAIL before implementation**
 
-- [ ] T031 [P] [US2] Write integration test for batch bronze processing in `tests/integration/test_bronze_batch.py`: test folder with 3 PDFs (all processed), test mixed file types (only PDFs processed, others skipped with warning), test partial re-run (skip already-processed), test one corrupted PDF (continues processing others, reports failure), test empty folder (no error, zero results), test progress indicator output, test summary report content (total, successful, failed, time)
+- [x] T031 [P] [US2] Write integration test for batch bronze processing in `tests/integration/test_bronze_batch.py`: test folder with 3 PDFs (all processed), test mixed file types (only PDFs processed, others skipped with warning), test partial re-run (skip already-processed), test one corrupted PDF (continues processing others, reports failure), test empty folder (no error, zero results), test progress indicator output, test summary report content (total, successful, failed, time)
 
 ### Implementation for User Story 2
 
-- [ ] T032 [US2] Implement batch processor in `docmeld/docmeld/bronze/processor.py`: add process_folder(folder_path) method to BronzeProcessor — discovers all .pdf files in folder, iterates with progress tracking, calls process_file() for each, catches exceptions per file (fail-fast disabled per FR-034), collects results, returns ProcessingResult with total/successful/failed/failures list/processing_time
-- [ ] T033 [US2] Implement summary report generation in `docmeld/docmeld/utils/report.py`: generate_summary(result: ProcessingResult) → formats and prints summary to console and log: total files, successful, failed (with filenames and errors), processing time
-- [ ] T034 [US2] Update `docmeld/docmeld/parser.py`: create DocMeldParser class with `__init__(self, path: str)` that detects file vs folder, `process_bronze()` that delegates to BronzeProcessor.process_file() or process_folder()
-- [ ] T035 [US2] Run `pytest tests/integration/test_bronze_batch.py -v` — all tests MUST pass
+- [x] T032 [US2] Implement batch processor in `docmeld/docmeld/bronze/processor.py`: add process_folder(folder_path) method to BronzeProcessor — discovers all .pdf files in folder, iterates with progress tracking, calls process_file() for each, catches exceptions per file (fail-fast disabled per FR-034), collects results, returns ProcessingResult with total/successful/failed/failures list/processing_time
+- [x] T033 [US2] Implement summary report generation in `docmeld/docmeld/utils/report.py`: generate_summary(result: ProcessingResult) → formats and prints summary to console and log: total files, successful, failed (with filenames and errors), processing time
+- [x] T034 [US2] Update `docmeld/docmeld/parser.py`: create DocMeldParser class with `__init__(self, path: str)` that detects file vs folder, `process_bronze()` that delegates to BronzeProcessor.process_file() or process_folder()
+- [x] T035 [US2] Run `pytest tests/integration/test_bronze_batch.py -v` — all tests MUST pass
 
 **Checkpoint**: Batch bronze processing works. Can process folders of PDFs with error resilience and summary reports.
 
@@ -126,20 +126,20 @@
 
 > **NOTE: Write these tests FIRST, ensure they FAIL before implementation**
 
-- [ ] T036 [P] [US3] Write unit tests for title tracker in `tests/unit/test_title_tracker.py`: test stack push/pop on level transitions (H1→H2→H1 pops H2), test get_hierarchy_markdown() renders full stack as `# Title\n## Subtitle`, test empty stack returns empty string, test same-level replacement, test deep nesting (H1→H2→H3→H4)
-- [ ] T037 [P] [US3] Write unit tests for markdown renderer in `tests/unit/test_markdown_renderer.py`: test title rendering with correct `#` count (level 0 → `#`, level 1 → `##`), test text rendering preserves content, test table rendering with `[[Table1]]` and `[/Table1]` markers, test global table numbering across pages, test small table handling (≤1 data row → `[[Table]]` without number), test image rendering
-- [ ] T038 [P] [US3] Write unit tests for page aggregator in `tests/unit/test_page_aggregator.py`: test grouping elements by page_no, test elements sorted within page, test empty page handling, test single-page document, test multi-page document
-- [ ] T039 [P] [US3] Write integration test for silver pipeline in `tests/integration/test_silver_pipeline.py`: test bronze JSON → silver JSONL conversion with sample data, test one line per page, test title hierarchy across pages (page 2 starts with titles from page 1), test global table numbering, test JSONL metadata fields (uuid, source, page_no, session_title), test idempotency (skip if JSONL exists), test page_content markdown format
+- [x] T036 [P] [US3] Write unit tests for title tracker in `tests/unit/test_title_tracker.py`: test stack push/pop on level transitions (H1→H2→H1 pops H2), test get_hierarchy_markdown() renders full stack as `# Title\n## Subtitle`, test empty stack returns empty string, test same-level replacement, test deep nesting (H1→H2→H3→H4)
+- [x] T037 [P] [US3] Write unit tests for markdown renderer in `tests/unit/test_markdown_renderer.py`: test title rendering with correct `#` count (level 0 → `#`, level 1 → `##`), test text rendering preserves content, test table rendering with `[[Table1]]` and `[/Table1]` markers, test global table numbering across pages, test small table handling (≤1 data row → `[[Table]]` without number), test image rendering
+- [x] T038 [P] [US3] Write unit tests for page aggregator in `tests/unit/test_page_aggregator.py`: test grouping elements by page_no, test elements sorted within page, test empty page handling, test single-page document, test multi-page document
+- [x] T039 [P] [US3] Write integration test for silver pipeline in `tests/integration/test_silver_pipeline.py`: test bronze JSON → silver JSONL conversion with sample data, test one line per page, test title hierarchy across pages (page 2 starts with titles from page 1), test global table numbering, test JSONL metadata fields (uuid, source, page_no, session_title), test idempotency (skip if JSONL exists), test page_content markdown format
 
 ### Implementation for User Story 3
 
-- [ ] T040 [US3] Implement title tracker in `docmeld/docmeld/silver/title_tracker.py`: TitleTracker class with stack list, update(level, content) pops stack to parent level then pushes, get_hierarchy_markdown() renders stack as markdown headers, get_session_title() returns compact title string
-- [ ] T041 [US3] Implement markdown renderer in `docmeld/docmeld/silver/markdown_renderer.py`: render_page(elements, title_tracker, table_counter) → iterates elements, renders titles as `# heading`, text as-is, tables with `[[TableN]]`/`[/TableN]` markers (global numbering, skip small tables), images as markdown image syntax. Returns (page_content_str, updated_table_counter)
-- [ ] T042 [US3] Implement page aggregator in `docmeld/docmeld/silver/page_aggregator.py`: group_by_page(elements) → returns dict[int, List[dict]] grouping elements by page_no, preserving order within each page
-- [ ] T043 [US3] Implement silver processor in `docmeld/docmeld/silver/processor.py`: SilverProcessor class with process(bronze_json_path) → loads bronze JSON, groups by page, initializes TitleTracker and table_counter=0, for each page: generates UUID, builds metadata (uuid, source, page_no as "pageN", session_title from tracker), renders page_content via markdown_renderer, writes JSONL line. Checks idempotency (skip if .jsonl exists). Returns SilverResult with output_path and page_count
-- [ ] T044 [US3] Create `docmeld/docmeld/silver/__init__.py` with exports: SilverProcessor, TitleTracker
-- [ ] T045 [US3] Update `docmeld/docmeld/parser.py`: add process_silver(bronze_json_path) method to DocMeldParser that delegates to SilverProcessor
-- [ ] T046 [US3] Run `pytest tests/unit/test_title_tracker.py tests/unit/test_markdown_renderer.py tests/unit/test_page_aggregator.py tests/integration/test_silver_pipeline.py -v` — all tests MUST pass
+- [x] T040 [US3] Implement title tracker in `docmeld/docmeld/silver/title_tracker.py`: TitleTracker class with stack list, update(level, content) pops stack to parent level then pushes, get_hierarchy_markdown() renders stack as markdown headers, get_session_title() returns compact title string
+- [x] T041 [US3] Implement markdown renderer in `docmeld/docmeld/silver/markdown_renderer.py`: render_page(elements, title_tracker, table_counter) → iterates elements, renders titles as `# heading`, text as-is, tables with `[[TableN]]`/`[/TableN]` markers (global numbering, skip small tables), images as markdown image syntax. Returns (page_content_str, updated_table_counter)
+- [x] T042 [US3] Implement page aggregator in `docmeld/docmeld/silver/page_aggregator.py`: group_by_page(elements) → returns dict[int, List[dict]] grouping elements by page_no, preserving order within each page
+- [x] T043 [US3] Implement silver processor in `docmeld/docmeld/silver/processor.py`: SilverProcessor class with process(bronze_json_path) → loads bronze JSON, groups by page, initializes TitleTracker and table_counter=0, for each page: generates UUID, builds metadata (uuid, source, page_no as "pageN", session_title from tracker), renders page_content via markdown_renderer, writes JSONL line. Checks idempotency (skip if .jsonl exists). Returns SilverResult with output_path and page_count
+- [x] T044 [US3] Create `docmeld/docmeld/silver/__init__.py` with exports: SilverProcessor, TitleTracker
+- [x] T045 [US3] Update `docmeld/docmeld/parser.py`: add process_silver(bronze_json_path) method to DocMeldParser that delegates to SilverProcessor
+- [x] T046 [US3] Run `pytest tests/unit/test_title_tracker.py tests/unit/test_markdown_renderer.py tests/unit/test_page_aggregator.py tests/integration/test_silver_pipeline.py -v` — all tests MUST pass
 
 **Checkpoint**: Bronze JSON → Silver JSONL works. Each page is self-contained with title hierarchy and global table numbering.
 
@@ -155,18 +155,18 @@
 
 > **NOTE: Write these tests FIRST, ensure they FAIL before implementation**
 
-- [ ] T047 [P] [US4] Write unit tests for DeepSeek client in `tests/unit/test_deepseek_client.py`: test API call with mocked response (returns description + keywords), test retry logic with exponential backoff (1s, 2s, 4s), test max retries exceeded raises exception, test rate limiting delay (0.5s between calls), test missing API key raises ValueError, test structured output parsing (Pydantic PageMetadata model)
-- [ ] T048 [P] [US4] Write unit tests for metadata extractor in `tests/unit/test_metadata_extractor.py`: test extract_metadata(page_content) returns description and keywords, test empty page_content returns "Blank page" description, test gold_processing_failed flag on API failure
-- [ ] T049 [P] [US4] Write integration test for gold pipeline in `tests/integration/test_gold_pipeline.py`: test silver JSONL → gold JSONL conversion (mock DeepSeek API), test `_gold` suffix in output filename, test original silver JSONL preserved, test each page has description and keywords in metadata, test idempotency (skip if gold JSONL exists with description/keywords), test partial failure (one page fails, others succeed, failed page marked with gold_processing_failed=true), test API retry on transient error
+- [x] T047 [P] [US4] Write unit tests for DeepSeek client in `tests/unit/test_deepseek_client.py`: test API call with mocked response (returns description + keywords), test retry logic with exponential backoff (1s, 2s, 4s), test max retries exceeded raises exception, test rate limiting delay (0.5s between calls), test missing API key raises ValueError, test structured output parsing (Pydantic PageMetadata model)
+- [x] T048 [P] [US4] Write unit tests for metadata extractor in `tests/unit/test_metadata_extractor.py`: test extract_metadata(page_content) returns description and keywords, test empty page_content returns "Blank page" description, test gold_processing_failed flag on API failure
+- [x] T049 [P] [US4] Write integration test for gold pipeline in `tests/integration/test_gold_pipeline.py`: test silver JSONL → gold JSONL conversion (mock DeepSeek API), test `_gold` suffix in output filename, test original silver JSONL preserved, test each page has description and keywords in metadata, test idempotency (skip if gold JSONL exists with description/keywords), test partial failure (one page fails, others succeed, failed page marked with gold_processing_failed=true), test API retry on transient error
 
 ### Implementation for User Story 4
 
-- [ ] T050 [US4] Implement DeepSeek client in `docmeld/docmeld/gold/deepseek_client.py`: DeepSeekClient class with `__init__(api_key, endpoint=None, temperature=1.0)`, loads from env via env_loader, creates ChatDeepSeek with structured output (PageMetadata Pydantic model: description str, keywords List[str]). Implement call_with_retry(func, max_retries=3) with exponential backoff (2^attempt seconds). Add 0.5s delay between calls for rate limiting
-- [ ] T051 [US4] Implement metadata extractor in `docmeld/docmeld/gold/metadata_extractor.py`: MetadataExtractor class with extract(page_content) → calls DeepSeek client with prompt to analyze page and extract description + keywords, handles empty content ("Blank page"), catches API failures and returns gold_processing_failed=true
-- [ ] T052 [US4] Implement gold processor in `docmeld/docmeld/gold/processor.py`: GoldProcessor class with process(silver_jsonl_path) → reads silver JSONL line by line, checks idempotency (skip if `_gold.jsonl` exists with description/keywords), for each page: calls metadata_extractor, merges description+keywords into metadata, writes to `{basename}_gold.jsonl`. Continues on per-page failure (FR-028). Returns GoldResult with output_path, pages_enriched, pages_failed
-- [ ] T053 [US4] Create `docmeld/docmeld/gold/__init__.py` with exports: GoldProcessor, DeepSeekClient
-- [ ] T054 [US4] Update `docmeld/docmeld/parser.py`: add process_gold(silver_jsonl_path) method and process_all() method that chains bronze → silver → gold, returns ProcessingResult
-- [ ] T055 [US4] Run `pytest tests/unit/test_deepseek_client.py tests/unit/test_metadata_extractor.py tests/integration/test_gold_pipeline.py -v` — all tests MUST pass
+- [x] T050 [US4] Implement DeepSeek client in `docmeld/docmeld/gold/deepseek_client.py`: DeepSeekClient class with `__init__(api_key, endpoint=None, temperature=1.0)`, loads from env via env_loader, creates ChatDeepSeek with structured output (PageMetadata Pydantic model: description str, keywords List[str]). Implement call_with_retry(func, max_retries=3) with exponential backoff (2^attempt seconds). Add 0.5s delay between calls for rate limiting
+- [x] T051 [US4] Implement metadata extractor in `docmeld/docmeld/gold/metadata_extractor.py`: MetadataExtractor class with extract(page_content) → calls DeepSeek client with prompt to analyze page and extract description + keywords, handles empty content ("Blank page"), catches API failures and returns gold_processing_failed=true
+- [x] T052 [US4] Implement gold processor in `docmeld/docmeld/gold/processor.py`: GoldProcessor class with process(silver_jsonl_path) → reads silver JSONL line by line, checks idempotency (skip if `_gold.jsonl` exists with description/keywords), for each page: calls metadata_extractor, merges description+keywords into metadata, writes to `{basename}_gold.jsonl`. Continues on per-page failure (FR-028). Returns GoldResult with output_path, pages_enriched, pages_failed
+- [x] T053 [US4] Create `docmeld/docmeld/gold/__init__.py` with exports: GoldProcessor, DeepSeekClient
+- [x] T054 [US4] Update `docmeld/docmeld/parser.py`: add process_gold(silver_jsonl_path) method and process_all() method that chains bronze → silver → gold, returns ProcessingResult
+- [x] T055 [US4] Run `pytest tests/unit/test_deepseek_client.py tests/unit/test_metadata_extractor.py tests/integration/test_gold_pipeline.py -v` — all tests MUST pass
 
 **Checkpoint**: Full pipeline works: PDF → Bronze JSON → Silver JSONL → Gold JSONL with AI-generated descriptions and keywords.
 
@@ -178,15 +178,15 @@
 
 ### Tests
 
-- [ ] T056 [P] Write integration test for CLI in `tests/integration/test_cli.py`: test `docmeld process <file>` runs all stages, test `docmeld bronze <file>` runs bronze only, test `docmeld silver <json>` runs silver only, test `docmeld gold <jsonl>` runs gold only, test `docmeld process <folder>` batch mode, test `--help` output, test invalid path error message
-- [ ] T057 [P] Write end-to-end integration test in `tests/integration/test_end_to_end.py`: test full pipeline PDF → bronze → silver → gold with sample_simple.pdf, test batch pipeline with folder of PDFs, test summary report generation, test log file creation, test idempotency across all stages
+- [x] T056 [P] Write integration test for CLI in `tests/integration/test_cli.py`: test `docmeld process <file>` runs all stages, test `docmeld bronze <file>` runs bronze only, test `docmeld silver <json>` runs silver only, test `docmeld gold <jsonl>` runs gold only, test `docmeld process <folder>` batch mode, test `--help` output, test invalid path error message
+- [x] T057 [P] Write end-to-end integration test in `tests/integration/test_end_to_end.py`: test full pipeline PDF → bronze → silver → gold with sample_simple.pdf, test batch pipeline with folder of PDFs, test summary report generation, test log file creation, test idempotency across all stages
 
 ### Implementation
 
-- [ ] T058 Implement CLI interface in `docmeld/docmeld/cli.py`: argparse-based CLI with subcommands: `process` (all stages), `bronze`, `silver`, `gold`. Accept positional path argument. Add `--output-dir` optional flag. Wire to DocMeldParser methods. Entry point: `docmeld = docmeld.cli:main` in pyproject.toml
-- [ ] T059 Update `docmeld/docmeld/parser.py`: ensure process_all() chains all three stages, handles batch mode (folder input), generates summary report via utils/report.py, creates timestamped log file
-- [ ] T060 Run `pytest tests/integration/test_cli.py tests/integration/test_end_to_end.py -v` — all tests MUST pass
-- [ ] T061 Run full test suite: `pytest --cov=docmeld --cov-report=term-missing` — verify 90%+ coverage
+- [x] T058 Implement CLI interface in `docmeld/docmeld/cli.py`: argparse-based CLI with subcommands: `process` (all stages), `bronze`, `silver`, `gold`. Accept positional path argument. Add `--output-dir` optional flag. Wire to DocMeldParser methods. Entry point: `docmeld = docmeld.cli:main` in pyproject.toml
+- [x] T059 Update `docmeld/docmeld/parser.py`: ensure process_all() chains all three stages, handles batch mode (folder input), generates summary report via utils/report.py, creates timestamped log file
+- [x] T060 Run `pytest tests/integration/test_cli.py tests/integration/test_end_to_end.py -v` — all tests MUST pass
+- [x] T061 Run full test suite: `pytest --cov=docmeld --cov-report=term-missing` — verify 90%+ coverage
 
 **Checkpoint**: CLI works, full pipeline tested end-to-end, coverage target met.
 
@@ -196,15 +196,15 @@
 
 **Purpose**: Documentation, CI/CD, and release preparation
 
-- [ ] T062 [P] Create `README.md` with: project overview, installation (`pip install docmeld`), 5-line quickstart, feature list, output format examples, roadmap, badges placeholders, MIT license badge
-- [ ] T063 [P] Create `CONTRIBUTING.md` with: development setup (venv, install dev deps), TDD workflow, code style (ruff, black, mypy), PR process, issue templates
-- [ ] T064 [P] Create `CHANGELOG.md` with initial v0.1.0 entry following Keep a Changelog format
-- [ ] T065 [P] Create GitHub Actions workflow `docmeld/.github/workflows/test.yml`: run pytest on push/PR, matrix Python 3.9/3.10/3.11/3.12, macOS + Linux + Windows
-- [ ] T066 [P] Create GitHub Actions workflow `docmeld/.github/workflows/lint.yml`: run ruff check, black --check, mypy on push/PR
-- [ ] T067 [P] Create GitHub Actions workflow `docmeld/.github/workflows/publish.yml`: build wheel, publish to PyPI on tag push (v*)
-- [ ] T068 Run `ruff check docmeld/ && black --check docmeld/ && mypy docmeld/` — all MUST pass with zero errors
-- [ ] T069 Run quickstart.md validation: execute the 5-line example from quickstart.md against sample_simple.pdf, verify output matches expected structure
-- [ ] T070 Final review: verify all JSON outputs match `specs/001-mvp-pdf-pipeline/contracts/element-schema.json`, verify silver/gold JSONL structure matches examples in `references/00-core/`
+- [x] T062 [P] Create `README.md` with: project overview, installation (`pip install docmeld`), 5-line quickstart, feature list, output format examples, roadmap, badges placeholders, MIT license badge
+- [x] T063 [P] Create `CONTRIBUTING.md` with: development setup (venv, install dev deps), TDD workflow, code style (ruff, black, mypy), PR process, issue templates
+- [x] T064 [P] Create `CHANGELOG.md` with initial v0.1.0 entry following Keep a Changelog format
+- [x] T065 [P] Create GitHub Actions workflow `docmeld/.github/workflows/test.yml`: run pytest on push/PR, matrix Python 3.9/3.10/3.11/3.12, macOS + Linux + Windows
+- [x] T066 [P] Create GitHub Actions workflow `docmeld/.github/workflows/lint.yml`: run ruff check, black --check, mypy on push/PR
+- [x] T067 [P] Create GitHub Actions workflow `docmeld/.github/workflows/publish.yml`: build wheel, publish to PyPI on tag push (v*)
+- [x] T068 Run `ruff check docmeld/ && black --check docmeld/ && mypy docmeld/` — all MUST pass with zero errors
+- [x] T069 Run quickstart.md validation: execute the 5-line example from quickstart.md against sample_simple.pdf, verify output matches expected structure
+- [x] T070 Final review: verify all JSON outputs match `specs/001-mvp-pdf-pipeline/contracts/element-schema.json`, verify silver/gold JSONL structure matches examples in `references/00-core/`
 
 ---
 
